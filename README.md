@@ -5,6 +5,16 @@ fish is a smart and user-friendly command line shell for OS X, Linux, and the re
 
 For more on fish's design philosophy, see the [design document](http://fishshell.com/docs/current/design.html).
 
+# Solaris Version
+
+## What did I modified?
+
+1.	Some of the C++ Standard function which defines in "std" namespace could not be called directly in Solaris, whenever declares "*using namespace std*", for example, "wcscasecmp()" could not be allowed, but "std::wcscasecmp()" could be possibly accepted. So I add the "std" namespace declaration before the standard function of whole project.
+
+2.	Solaris' libc seems did not archieve the system call named "flock()", which could take same effects by calling fcntl(). By Linux MAN pages, the flock() wasn't an standard UNIX system call, and it's only available on Linux and BSD-Famliy OS, so I copied flock() functions' source code from [GLIBC](https://www.gnu.org/software/libc/) with no way for chooses.
+
+3.	Still have bugs in this version, may causes by unspported system calls, difference terminal between Linux and solaris, and any other I did not discovered yet.
+
 ## Quick Start
 
 fish generally works like other shells, like bash or zsh. A few important differences can be found at <http://fishshell.com/docs/current/tutorial.html> by searching for the magic phrase 'unlike other shells'.
