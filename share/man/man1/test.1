@@ -1,4 +1,4 @@
-.TH "test" 1 "Mon Jul 6 2015" "Version 2.2.0" "fish" \" -*- nroff -*-
+.TH "test" 1 "Sat May 21 2016" "Version 2.3.0" "fish" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -18,8 +18,8 @@ Tests the expression given and sets the exit status to 0 if true, and 1 if false
 .PP
 The first form (\fCtest\fP) is preferred\&. For compatibility with other shells, the second form is available: a matching pair of square brackets (\fC[ [EXPRESSION ] ]\fP)\&.
 .PP
-The following operators are available to examine files and directories:
-.PP
+This test is mostly POSIX-compatible\&.
+.SS "Operators for files and directories"
 .IP "\(bu" 2
 \fC-b FILE\fP returns true if \fCFILE\fP is a block device\&.
 .IP "\(bu" 2
@@ -55,9 +55,7 @@ The following operators are available to examine files and directories:
 .IP "\(bu" 2
 \fC-x FILE\fP returns true if \fCFILE\fP is marked as executable\&.
 .PP
-.PP
-The following operators are available to compare and examine text strings:
-.PP
+.SS "Operators for text strings"
 .IP "\(bu" 2
 \fCSTRING1 = STRING2\fP returns true if the strings \fCSTRING1\fP and \fCSTRING2\fP are identical\&.
 .IP "\(bu" 2
@@ -67,9 +65,7 @@ The following operators are available to compare and examine text strings:
 .IP "\(bu" 2
 \fC-z STRING\fP returns true if the length of \fCSTRING\fP is zero\&.
 .PP
-.PP
-The following operators are available to compare and examine numbers:
-.PP
+.SS "Operators to compare and examine numbers"
 .IP "\(bu" 2
 \fCNUM1 -eq NUM2\fP returns true if \fCNUM1\fP and \fCNUM2\fP are numerically equal\&.
 .IP "\(bu" 2
@@ -85,9 +81,7 @@ The following operators are available to compare and examine numbers:
 .PP
 .PP
 Note that only integers are supported\&. For more complex mathematical operations, including fractions, the \fCenv\fP program may be useful\&. Consult the documentation for your operating system\&.
-.PP
-Expressions can be combined using the following operators:
-.PP
+.SS "Operators to combine expressions"
 .IP "\(bu" 2
 \fCCOND1 -a COND2\fP returns true if both \fCCOND1\fP and \fCCOND2\fP are true\&.
 .IP "\(bu" 2
@@ -138,6 +132,28 @@ Parentheses and the \fC-o\fP and \fC-a\fP operators can be combined to produce m
 \fBif\fP \fBtest\fP \\( -f /foo -o -f /bar \\) -a \\( -f /baz -o -f /bat \\)
     \fBecho\fP Success\&.
 \fBend\fP\&.
+.fi
+.PP
+.PP
+Numerical comparisons will simply fail if one of the operands is not a number:
+.PP
+.PP
+.nf
+
+\fBif\fP \fBtest\fP 42 -eq 'The answer to life, the universe and everything'
+    \fBecho\fP So long and thanks \fBfor\fP all the fish  # will not be executed
+\fBend\fP
+.fi
+.PP
+.PP
+A common comparison is with $status:
+.PP
+.PP
+.nf
+
+\fBif\fP \fBtest\fP $status -eq 0
+    \fBecho\fP 'Previous command succeeded'
+\fBend\fP
 .fi
 .PP
 .SS "Standards"

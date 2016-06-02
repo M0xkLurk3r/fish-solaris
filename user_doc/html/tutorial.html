@@ -56,6 +56,7 @@
 <li><a href="#tut_path">$PATH</a></li>
 <li><a href="#tut_startup">Startup</a></li>
 <li><a href="#tut_autoload">Autoloading Functions</a></li>
+<li><a href="#tut_universal">Universal Variables</a></li>
 <li><a href="#tut_more">Ready for more?</a></li>
 </ul>
 
@@ -77,7 +78,7 @@ Learning fish</h1>
  <pre class="fish cli-dark">
 <span class="output">Welcome to fish, the friendly interactive shell</span>
 <span class="output">Type <span class="cwd">help</span> for instructions on how to use fish</span>
-you@hostname <span class="prompt"><span class="path">~</span>&gt;</span><span class="cursor"> </span>
+you<span>@</span>hostname <span class="prompt"><span class="path">~</span>&gt;</span><span class="cursor"> </span>
 </pre><p><code>fish</code> comes with a default prompt that shows your username, hostname, and working directory. You'll see <a href="#tut_prompt">how to change your prompt</a> further down. From now on, we'll pretend your prompt is just a '<code>&gt;</code>' to save space.</p>
 <h1><a class="anchor" id="tut_running_commands"></a>
 Running Commands</h1>
@@ -123,20 +124,20 @@ Wildcards</h1>
 <p><code>fish</code> supports the familiar wildcard <code>*</code>. To list all JPEG files:</p>
  
  <pre class="fish cli-dark">
-<span class="prompt">&gt;</span> <span class="binary">ls</span> <span class="argument">*.jpg</span>
+<span class="prompt">&gt;</span> <span class="binary">ls</span> <span class="file">*.jpg</span>
 <span class="output">lena.jpg</span>
 <span class="output">meena.jpg</span>
 <span class="output">santa maria.jpg</span>
 </pre><p>You can include multiple wildcards:</p>
  
  <pre class="fish cli-dark">
-<span class="prompt">&gt;</span> <span class="binary">ls</span> <span class="argument">l*.p*</span>
+<span class="prompt">&gt;</span> <span class="binary">ls</span> <span class="file">l*.p*</span>
 <span class="output">lena.png</span>
 <span class="output">lesson.pdf</span>
 </pre><p>Especially powerful is the recursive wildcard ** which searches directories recursively:</p>
  
  <pre class="fish cli-dark">
-<span class="prompt">&gt;</span> <span class="binary">ls</span> <span class="path">/var/</span><span class="argument">**.log</span>
+<span class="prompt">&gt;</span> <span class="binary">ls</span> <span class="path">/var/**.log</span>
 <span class="output">/var/log/system.log</span>
 <span class="output">/var/run/sntp.log</span>
 </pre><p>If that directory traversal is taking a long time, you can <span class="key"><em>Control</em><span>-</span><b>C</b></span> out of it.</p>
@@ -164,7 +165,7 @@ Autosuggestions</h1>
 </pre><p>And history too. Type a command once, and you can re-summon it by just typing a few letters:</p>
  
  <pre class="fish cli-dark">
-<span class="prompt">&gt;</span> <span class="error">r</span><span class="suggest"><span class="cursor">s</span>ync -avze ssh . myname@somelonghost.com:/some/long/path/doo/dee/doo/dee/doo</span>
+<span class="prompt">&gt;</span> <span class="error">r</span><span class="suggest"><span class="cursor">s</span>ync -avze ssh . myname<span>@</span>somelonghost.com:/some/long/path/doo/dee/doo/dee/doo</span>
 </pre><p>To accept the autosuggestion, hit <span class="key"><b>&rarr;</b></span> or <span class="key"><em>Control</em><span>-</span><b>F</b></span>. To accept a single word of the autosuggestion, <span class="key"><em>Alt</em><span>-</span><b>&rarr;</b></span> (right arrow). If the autosuggestion is not what you want, just ignore it.</p>
 <h1><a class="anchor" id="tut_tab_completions"></a>
 Tab Completions</h1>
@@ -172,18 +173,18 @@ Tab Completions</h1>
 <p>Press <span class="key"><b>Tab</b></span>, and <code>fish</code> will attempt to complete the command, argument, or path:</p>
  
  <pre class="fish cli-dark">
-<span class="prompt">&gt;</span> <span class="error">/pri</span> <span class="key"><b>Tab</b></span> &rarr; <span class="path">/private/</span>
+<span class="prompt">&gt;</span> <span class="error">/pri</span> <span>@</span>key{Tab} &rarr; <span class="path">/private/</span>
 </pre><p>If there's more than one possibility, it will list them:</p>
  
  <pre class="fish cli-dark">
-<span class="prompt">&gt;</span> <span class="error">~/stuff/s</span> <span class="key"><b>Tab</b></span>
+<span class="prompt">&gt;</span> <span class="error">~/stuff/s</span> <span>@</span>key{Tab}
 <span class="output"><span class="match">~/stuff/s</span>cript.sh  <em>(Executable, 4.8kB)</em>  <span class="match">~/stuff/s</span>ources/  <em>(Directory)</em></span>
 </pre><p>Hit tab again to cycle through the possibilities.</p>
 <p><code>fish</code> can also complete many commands, like git branches:</p>
  
  <pre class="fish cli-dark">
-<span class="prompt">&gt;</span> <span class="binary">git</span> <span class="argument">merge</span> <span class="argument">pr</span> <span class="key"><b>Tab</b></span> &rarr; <span class="binary">git</span> <span class="argument">merge</span> <span class="argument">prompt_designer</span>
-<span class="prompt">&gt;</span> <span class="binary">git</span> <span class="argument">checkout</span> <span class="argument">b</span> <span class="key"><b>Tab</b></span>
+<span class="prompt">&gt;</span> <span class="binary">git</span> <span class="argument">merge</span> <span class="argument">pr</span> <span>@</span>key{Tab} &rarr; <span class="binary">git</span> <span class="argument">merge</span> <span class="argument">prompt_designer</span>
+<span class="prompt">&gt;</span> <span class="binary">git</span> <span class="argument">checkout</span> <span class="argument">b</span> <span>@</span>key{Tab}
 <span class="output"><span class="match">b</span>uiltin_list_io_merge <em>(Branch)</em> <span class="match">b</span>uiltin_set_color <em>(Branch)</em> <span class="match">b</span>usted_events <em>(Tag)</em></span>
 </pre><p>Try hitting tab and see what <code>fish</code> can do!</p>
 <h1><a class="anchor" id="tut_variables"></a>
@@ -213,7 +214,7 @@ Variables</h1>
 <span class="prompt">&gt;</span> <span class="binary">mkdir</span> <span class="variable"><span class="operator">$</span>name</span>
 <span class="prompt">&gt;</span> <span class="binary">ls</span>
 <span class="output">Mister Noodle</span>
-</pre><p>In bash, this would have created two directories "Mister" and "Noodle". In <code>fish</code>, it created only one: the variable had the value "Mister Noodle", so that is the argument that was passed to <code>mkdir</code>, spaces and all.</p>
+</pre><p>In bash, this would have created two directories "Mister" and "Noodle". In <code>fish</code>, it created only one: the variable had the value "Mister Noodle", so that is the argument that was passed to <code>mkdir</code>, spaces and all. Other shells use the term "arrays", rather than lists.</p>
 <h1><a class="anchor" id="tut_exit_status"></a>
 Exit Status</h1>
 <p>Unlike other shells, <code>fish</code> stores the exit status of the last command in <code>$status</code> instead of <code>$?</code>.</p>
@@ -283,7 +284,19 @@ Lists</h1>
 <span class="output">entry: /usr/sbin</span>
 <span class="output">entry: /sbin</span>
 <span class="output">entry: /usr/local/bin</span>
-</pre><h1><a class="anchor" id="tut_command_substitutions"></a>
+</pre><p>Lists adjacent to other lists or strings are expanded as <a href="index.html#cartesian-product">cartesian products</a> unless quoted (see <a href="index.html#expand-variable">Variable expansion</a>):</p>
+ 
+ <pre class="fish cli-dark">
+<span class="prompt">&gt;</span> <span class="command">set</span> <span class="argument">-l</span> <span class="argument">a</span> <span class="argument">1</span> <span class="argument">2</span> <span class="argument">3</span>
+<span class="prompt">&gt;</span> <span class="command">set</span> <span class="argument">-l</span> <span class="argument">1</span> <span class="argument">a</span> <span class="argument">b</span> <span class="argument">c</span>
+<span class="prompt">&gt;</span> <span class="command">echo</span> <span class="variable"><span class="operator">$</span>a</span><span class="variable"><span class="operator">$</span>1</span>
+<span class="output">1a 2a 3a 1b 2b 3b 1c 2c 3c</span>
+<span class="prompt">&gt;</span> <span class="command">echo</span> <span class="variable"><span class="operator">$</span>a</span><span class="string">" banana"</span>
+<span class="output">1 banana 2 banana 3 banana</span>
+<span class="prompt">&gt;</span> <span class="command">echo</span> <span class="string">"$a banana"</span>
+<span class="output">1 2 3 banana</span>
+</pre><p>This is similar to <a href="index.html#expand-brace">Brace expansion</a>.</p>
+<h1><a class="anchor" id="tut_command_substitutions"></a>
 Command Substitutions</h1>
 <p>Command substitutions use the output of one command as an argument to another. Unlike other shells, <code>fish</code> does not use backticks ` for command substitutions. Instead, it uses parentheses:</p>
  
@@ -299,8 +312,8 @@ Command Substitutions</h1>
 </pre><p>Command substitutions are not expanded within quotes. Instead, you can temporarily close the quotes, add the command substitution, and reopen them, all in the same argument:</p>
  
  <pre class="fish cli-dark">
-<span class="prompt">&gt;</span> <span class="binary">touch</span> <em><span class="string">"testing_"</span></em><span class="operator">(</span><span class="binary">date</span> <span class="argument">+%s</span><span class="operator">)</span><em><span class="string">".txt"</span></em>
-<span class="prompt">&gt;</span> <span class="binary">ls</span> <span class="argument">*.txt</span>
+<span class="prompt">&gt;</span> <span class="binary">touch</span> <em><span class="string">"testing_"</span></em><span class="operator">(</span><span class="binary">date</span> <span class="argument">+<span>%</span>s</span><span class="operator">)</span><em><span class="string">".txt"</span></em>
+<span class="prompt">&gt;</span> <span class="binary">ls</span> <span class="file">*.txt</span>
 <span class="output">testing_1360099791.txt</span>
 </pre><h1><a class="anchor" id="tut_combiners"></a>
 Combiners (And, Or, Not)</h1>
@@ -352,7 +365,7 @@ Functions</h1>
  
  <pre class="fish cli-dark">
 <span class="prompt">&gt;</span> <span class="command">functions</span>
-<span class="output">alias, cd, delete-or-exit, dirh, dirs, down-or-search, eval, export, fish_command_not_found_setup, fish_config, fish_default_key_bindings, fish_prompt, fish_right_prompt, fish_sigtrap_handler, fish_update_completions, funced, funcsave, grep, help, history, isatty, ls, man, math, nextd, nextd-or-forward-word, open, popd, prevd, prevd-or-backward-word, prompt_pwd, psub, pushd, seq, setenv, sgrep, trap, type, umask, up-or-search, vared</span>
+<span class="output">alias, cd, delete-or-exit, dirh, dirs, down-or-search, eval, export, fish_command_not_found_setup, fish_config, fish_default_key_bindings, fish_prompt, fish_right_prompt, fish_sigtrap_handler, fish_update_completions, funced, funcsave, grep, help, history, isatty, ls, man, math, nextd, nextd-or-forward-word, open, popd, prevd, prevd-or-backward-word, prompt_pwd, psub, pushd, seq, setenv, trap, type, umask, up-or-search, vared</span>
 </pre><p>You can see the source for any function by passing its name to <code>functions</code>:</p>
  
  <pre class="fish cli-dark">
@@ -375,7 +388,7 @@ Loops</h1>
 </pre><p>For loops can be used to iterate over a list. For example, a list of files:</p>
  
  <pre class="fish cli-dark">
-<span class="prompt">&gt;</span> <span class="command">for</span> <span class="argument">file</span> <span class="command">in</span> <span class="argument">*.txt</span>
+<span class="prompt">&gt;</span> <span class="command">for</span> <span class="argument">file</span> <span class="command">in</span> <span class="file">*.txt</span>
     <span class="binary">cp</span> <span class="variable"><span class="operator">$</span>file</span> <span class="variable"><span class="operator">$</span>file</span><span class="argument">.bak</span>
 <span class="command">end</span>
 </pre><p>Iterating over a list of numbers can be done with <code>seq</code>:</p>
@@ -399,7 +412,7 @@ New Prompt % <span class="cursor"> </span>
  <pre class="fish cli-dark">
 <span class="prompt">&gt;</span> <span class="command">function</span> <span class="argument">fish_prompt</span>
       <span class="command">set_color</span> <span class="argument">purple</span>
-      <span class="binary">date</span> <span class="string">"+%m/%d/%y"</span>
+      <span class="binary">date</span> <span class="string">"+<span>%</span>m/<span>%</span>d/<span>%</span>y"</span>
       <span class="command">set_color</span> <span class="argument">FF0</span>
       <span class="command">echo</span> <span class="operator">(</span><span class="command">pwd</span><span class="operator">)</span> <span class="string">'&gt;'</span>
       <span class="command">set_color</span> <span class="argument">normal</span>
@@ -410,16 +423,16 @@ New Prompt % <span class="cursor"> </span>
 <h1><a class="anchor" id="tut_path"></a>
 $PATH</h1>
 <p><code>$PATH</code> is an environment variable containing the directories in which <code>fish</code> searches for commands. Unlike other shells, $PATH is a <a href="#tut_lists">list</a>, not a colon-delimited string.</p>
-<p>To prepend to <code>$PATH</code>, you can write:</p>
+<p>To prepend /usr/local/bin and /usr/sbin to <code>$PATH</code>, you can write:</p>
  
  <pre class="fish cli-dark">
-<span class="prompt">&gt;</span> <span class="command">set</span> <span class="argument">PATH</span> <span class="path">/new/path</span> <span class="variable"><span class="operator">$</span>PATH</span>
-</pre><p>You can do so directly in <code>fish.config</code>, like you might do in other shells with <code>.profile</code>. See <a href="#path_example">this example</a>.</p>
+<span class="prompt">&gt;</span> <span class="command">set</span> <span class="argument">PATH</span> <span class="path">/usr/local/bin</span> <span class="path">/usr/sbin</span> <span class="variable"><span class="operator">$</span>PATH</span>
+</pre><p>You can do so directly in <code>config.fish</code>, like you might do in other shells with <code>.profile</code>. See <a href="#path_example">this example</a>.</p>
 <p>A faster way is to modify the <code>$fish_user_paths</code> <a href="#tut_universal">universal variable</a>, which is automatically prepended to <code>$PATH</code>. For example, to permanently add <code>/usr/local/bin</code> to your <code>$PATH</code>, you could write:</p>
  
  <pre class="fish cli-dark">
 <span class="prompt">&gt;</span> <span class="command">set</span> <span class="argument">-U</span> <span class="argument">fish_user_paths</span> <span class="path">/usr/local/bin</span> <span class="variable"><span class="operator">$</span>fish_user_paths</span>
-</pre><p>The advantage is that you don't have to go mucking around in files: just run this once at the command line, and it will affect the current session and all future instances too. (Note: you should NOT add this line to <code>fish.config</code>. If you do, the variable will get longer each time you run fish!)</p>
+</pre><p>The advantage is that you don't have to go mucking around in files: just run this once at the command line, and it will affect the current session and all future instances too. (Note: you should NOT add this line to <code>config.fish</code>. If you do, the variable will get longer each time you run fish!)</p>
 <h1><a class="anchor" id="tut_startup"></a>
 Startup (Where's .bashrc?)</h1>
 <p><code>fish</code> starts by executing commands in <code>~/.config/fish/config.fish</code>. You can create it if it does not exist.</p>

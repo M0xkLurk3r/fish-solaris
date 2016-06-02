@@ -1,4 +1,4 @@
-.TH "while" 1 "Mon Jul 6 2015" "Version 2.2.0" "fish" \" -*- nroff -*-
+.TH "while" 1 "Sat May 21 2016" "Version 2.3.0" "fish" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -17,13 +17,13 @@
 .PP
 If the exit status of \fCCONDITION\fP is non-zero on the first iteration, \fCCOMMANDS\fP will not be executed at all\&.
 .PP
-Use \fC\fCbegin; \&.\&.\&.; end\fP\fP for complex conditions; more complex control can be achieved with \fCwhile true\fP containing a \fCbreak\fP\&.
+You can use \fC\fCand\fP\fP or \fC\fCor\fP\fP for complex conditions\&. Even more complex control can be achieved with \fCwhile true\fP containing a \fCbreak\fP\&.
 .SS "Example"
 .PP
 .nf
 
-\fBwhile\fP test -f foo\&.txt; \fBecho\fP file exists; \fBsleep\fP 10; \fBend\fP
-  outputs 'file exists' at 10 second intervals as long as the file foo\&.txt exists\&.
+\fBwhile\fP test -f foo\&.txt; \fBor\fP \fBtest\fP -f bar\&.txt ; \fBecho\fP file exists; \fBsleep\fP 10; \fBend\fP
+  outputs 'file exists' at 10 second intervals as long as the file foo\&.txt or bar\&.txt exists\&.
 .fi
 .PP
  

@@ -66,6 +66,7 @@
 <li><a href="#fish_config">fish_config</a></li>
 <li><a href="#fish_indent">fish_indent</a></li>
 <li><a href="#fish_prompt">fish_prompt</a></li>
+<li><a href="#fish_realpath">fish_realpath</a></li>
 <li><a href="#fish_right_prompt">fish_right_prompt</a></li>
 <li><a href="#fish">fish</a></li>
 <li><a href="#fish_update_completions">fish_update_completions</a></li>
@@ -81,13 +82,14 @@
 <li><a href="#isatty">isatty</a></li>
 <li><a href="#jobs">jobs</a></li>
 <li><a href="#math">math</a></li>
-<li><a href="#mimedb">mimedb</a></li>
 <li><a href="#nextd">nextd</a></li>
 <li><a href="#not">not</a></li>
 <li><a href="#open">open</a></li>
 <li><a href="#or">or</a></li>
 <li><a href="#popd">popd</a></li>
 <li><a href="#prevd">prevd</a></li>
+<li><a href="#printf">printf</a></li>
+<li><a href="#prompt_pwd">prompt_pwd</a></li>
 <li><a href="#psub">psub</a></li>
 <li><a href="#pushd">pushd</a></li>
 <li><a href="#pwd">pwd</a></li>
@@ -98,6 +100,8 @@
 <li><a href="#set">set</a></li>
 <li><a href="#source">source</a></li>
 <li><a href="#status">status</a></li>
+<li><a href="#string">string</a></li>
+<li><a href="#suspend">suspend</a></li>
 <li><a href="#switch">switch</a></li>
 <li><a href="#test">test</a></li>
 <li><a href="#trap">trap</a></li>
@@ -134,7 +138,7 @@ abbr - manage fish abbreviations</h1>
 Synopsis</h2>
  
  <pre class="fish synopsis">
-<span class="command">abbr</span> <span class="argument">-a</span> <span class="argument">word=</span><span class="string">"phrase"</span>
+<span class="command">abbr</span> <span class="argument">-a</span> <span class="argument">word</span> <span class="argument">phrase...</span>
 <span class="command">abbr</span> <span class="argument">-s</span>
 <span class="command">abbr</span> <span class="argument">-l</span>
 <span class="command">abbr</span> <span class="argument">-e</span> <span class="argument">word</span>
@@ -142,7 +146,7 @@ Synopsis</h2>
 Description</h2>
 <p><code>abbr</code> manipulates the list of abbreviations that fish will expand.</p>
 <p>Abbreviations are user-defined character sequences or words that are replaced with longer phrases after they are entered. For example, a frequently-run command such as <code>git checkout</code> can be abbreviated to <code>gco</code>. After entering <code>gco</code> and pressing <span class="key"><b>Space</b></span> or <span class="key"><b>Enter</b></span>, the full text <code>git checkout</code> will appear in the command line.</p>
-<p>Abbreviations are stored, by default, in a universal variable.</p>
+<p>Abbreviations are stored using universal variables. You can create abbreviations directly on the command line, and they will be saved automatically. Calling <code>abbr -a</code> in config.fish will lead to slightly worse startup performance.</p>
 <p>The following parameters are available:</p>
 <ul>
 <li><code>-a WORD PHRASE</code> or <code>--add WORD PHRASE</code> Adds a new abbreviation, where WORD will be expanded to PHRASE.</li>
@@ -150,6 +154,7 @@ Description</h2>
 <li><code>-l</code> or <code>--list</code> Lists all abbreviated words.</li>
 <li><code>-e WORD</code> or <code>--erase WORD</code> Erase the abbreviation WORD.</li>
 </ul>
+<p>Note: fish version 2.1 supported <code>-a WORD=PHRASE</code>. This syntax is now deprecated but will still be converted.</p>
 <h2><a class="anchor" id="abbr-example"></a>
 Examples</h2>
  
@@ -182,6 +187,7 @@ Description</h2>
 <li><code>DEFINITION</code> is the actual command to execute. The string <code>$argv</code> will be appended.</li>
 </ul>
 <p>You cannot create an alias to a function with the same name.</p>
+<p>Note that spaces need to be escaped in the call to alias just like in the commandline <em>even inside the quotes</em>.</p>
 <h2><a class="anchor" id="alias-example"></a>
 Example</h2>
 <p>The following code will create <code>rmi</code>, which runs <code>rm</code> with additional arguments on every invocation.</p>
@@ -194,6 +200,10 @@ Example</h2>
 <span class="command">function</span> <span class="argument">rmi</span>
     <span class="binary">rm</span> <span class="argument">-i</span> <span class="variable"><span class="operator">$</span>argv</span>
 <span class="command">end</span>
+
+<span class="comment"># This needs to have the spaces escaped or "Chrome.app..." will be seen as an argument to "/Applications/Google":</span>
+
+<span class="command">alias</span> <span class="argument">chrome=</span><span class="string">'/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome banana'</span>
 </pre><p>Back to <a href="index.html#toc-commands">index</a>. </p><hr/>
  <h1><a class="anchor" id="and"></a>
 and - conditionally execute a command</h1>
@@ -204,9 +214,9 @@ Synopsis</h2>
 <span class="argument">COMMAND1</span><span class="redirect">;</span> <span class="command">and</span> <span class="argument">COMMAND2</span>
 </pre><h2><a class="anchor" id="and-description"></a>
 Description</h2>
-<p><code>and</code> is used to execute a command if the current exit status (as set by the last previous command) is 0.</p>
-<p><code>and</code> does not change the current exit status.</p>
-<p>The exit status of the last foreground command to exit can always be accessed using the <a href="index.html#variables-status">$status</a> variable.</p>
+<p><code>and</code> is used to execute a command if the current exit status (as set by the previous command) is 0.</p>
+<p><code>and</code> statements may be used as part of the condition in an <a href="#if"><code>and</code></a> or <a href="#while"><code>while</code></a> block. See the documentation for <a href="#if"><code>if</code></a> and <a href="#while"><code>while</code></a> for examples.</p>
+<p><code>and</code> does not change the current exit status. The exit status of the last foreground command to exit can always be accessed using the <a href="index.html#variables-status">$status</a> variable.</p>
 <h2><a class="anchor" id="and-example"></a>
 Example</h2>
 <p>The following code runs the <code>make</code> command to build a program. If the build succeeds, <code>make</code>'s exit status is 0, and the program is installed. If either step fails, the exit status is 1, and <code>make clean</code> is run, which removes the files created by the build process.</p>
@@ -291,7 +301,7 @@ Description</h2>
 <p>If such a script produces output, the script needs to finish by calling <code>commandline -f repaint</code> in order to tell fish that a repaint is in order.</p>
 <p>When multiple <code>COMMAND</code>s are provided, they are all run in the specified order when the key is pressed.</p>
 <p>If no <code>SEQUENCE</code> is provided, all bindings (or just the bindings in the specified <code>MODE</code>) are printed. If <code>SEQUENCE</code> is provided without <code>COMMAND</code>, just the binding matching that sequence is printed.</p>
-<p>Key bindings are not saved between sessions by default. To save custom keybindings, edit the <code>fish_user_key_bindings</code> function and insert the appropriate <code>bind</code> statements.</p>
+<p>Key bindings are not saved between sessions by default. <b>Bare <code>bind</code> statements in <a href="index.html#initialization">config.fish</a> won't have any effect because it is sourced before the default keybindings are setup.</b> To save custom keybindings, put the <code>bind</code> statements into a function called <code>fish_user_key_bindings</code>, which will be <a href="tutorial.html#tut_autoload">autoloaded</a>.</p>
 <p>Key bindings may use "modes", which mimics Vi's modal input behavior. The default mode is "default", and every bind applies to a single mode. The mode can be viewed/changed with the <code>$fish_bind_mode</code> variable.</p>
 <p>The following parameters are available:</p>
 <ul>
@@ -305,29 +315,40 @@ Description</h2>
 </ul>
 <p>The following special input functions are available:</p>
 <ul>
+<li><code>accept-autosuggestion</code>, accept the current autosuggestion completely</li>
 <li><code>backward-char</code>, moves one character to the left</li>
+<li><code>backward-bigword</code>, move one whitespace-delimited word to the left</li>
 <li><code>backward-delete-char</code>, deletes one character of input to the left of the cursor</li>
+<li><code>backward-kill-bigword</code>, move the whitespace-delimited word to the left of the cursor to the killring</li>
 <li><code>backward-kill-line</code>, move everything from the beginning of the line to the cursor to the killring</li>
+<li><code>backward-kill-path-component</code>, move one path component to the left of the cursor (everything from the last "/" or whitespace exclusive) to the killring</li>
 <li><code>backward-kill-word</code>, move the word to the left of the cursor to the killring</li>
 <li><code>backward-word</code>, move one word to the left</li>
 <li><code>beginning-of-history</code>, move to the beginning of the history</li>
 <li><code>beginning-of-line</code>, move to the beginning of the line</li>
+<li><code>begin-selection</code>, start selecting text</li>
 <li><code>capitalize-word</code>, make the current word begin with a capital letter</li>
 <li><code>complete</code>, guess the remainder of the current token</li>
+<li><code>complete-and-search</code>, invoke the searchable pager on completion options</li>
 <li><code>delete-char</code>, delete one character to the right of the cursor</li>
-<li><code>delete-line</code>, delete the entire line</li>
 <li><code>downcase-word</code>, make the current word lowercase</li>
-<li><code>dump-functions</code>, print a list of all key-bindings</li>
 <li><code>end-of-history</code>, move to the end of the history</li>
 <li><code>end-of-line</code>, move to the end of the line</li>
-<li><code>explain</code>, print a description of possible problems with the current command</li>
+<li><code>end-selection</code>, end selecting text</li>
+<li><code>forward-bigword</code>, move one whitespace-delimited word to the right</li>
 <li><code>forward-char</code>, move one character to the right</li>
 <li><code>forward-word</code>, move one word to the right</li>
 <li><code>history-search-backward</code>, search the history for the previous match</li>
 <li><code>history-search-forward</code>, search the history for the next match</li>
+<li><code>kill-bigword</code>, move the next whitespace-delimited word to the killring</li>
 <li><code>kill-line</code>, move everything from the cursor to the end of the line to the killring</li>
+<li><code>kill-selection</code>, move the selected text to the killring</li>
 <li><code>kill-whole-line</code>, move the line to the killring</li>
 <li><code>kill-word</code>, move the next word to the killring</li>
+<li><code>suppress-autosuggestion</code>, remove the current autosuggestion</li>
+<li><code>swap-selection-start-stop</code>, go to the other end of the highlighted text without changing the selection</li>
+<li><code>transpose-chars</code>, transpose two characters to the left of the cursor</li>
+<li><code>transpose-words</code>, transpose two words to the left of the cursor</li>
 <li><code>upcase-word</code>, make the current word uppercase</li>
 <li><code>yank</code>, insert the latest entry of the killring into the buffer</li>
 <li><code>yank-pop</code>, rotate to the previous entry of the killring</li>
@@ -347,6 +368,11 @@ Examples</h2>
 <span class="command">set</span> <span class="argument">-g</span> <span class="argument">fish_key_bindings</span> <span class="argument">fish_vi_key_bindings</span>
 <span class="command">bind</span> <span class="argument">-M</span> <span class="argument">insert</span> <span class="argument"><span>\</span>cc</span> <span class="argument">kill-whole-line</span> <span class="argument">force-repaint</span>
 </pre><p>Turns on Vi key bindings and rebinds <span class="key"><em>Control</em><span>-</span><b>C</b></span> to clear the input line.</p>
+<h2><a class="anchor" id="special-case-escape"></a>
+Special Case: The escape Character</h2>
+<p>The escape key can be used standalone, for example, to switch from insertion mode to normal mode when using Vi keybindings. Escape may also be used as a "meta" key, to indicate the start of an escape sequence, such as function or arrow keys. Custom bindings can also be defined that begin with an escape character.</p>
+<p>fish waits for a period after receiving the escape character, to determine whether it is standalone or part of an escape sequence. While waiting, additional key presses make the escape key behave as a meta key. If no other key presses come in, it is handled as a standalone escape. The waiting period is set to 300 milliseconds (0.3 seconds) in the default key bindings and 10 milliseconds in the vi key bindings. It can be configured by setting the <code>fish_escape_delay_ms</code> variable to a value between 10 and 5000 ms. It is recommended that this be a universal variable that you set once from an interactive session.</p>
+<p>Note: fish 2.2.0 and earlier used a default of 10 milliseconds, and provided no way to configure it. That effectively made it impossible to use escape as a meta key.</p>
 <p>Back to <a href="index.html#toc-commands">index</a>. </p><hr/>
  <h1><a class="anchor" id="block"></a>
 block - temporarily block delivery of events</h1>
@@ -412,7 +438,7 @@ Example</h2>
 <p>The following code searches all .c files for "smurf", and halts at the first occurrence.</p>
  
  <pre class="fish">
-<span class="command">for</span> <span class="argument">i</span> <span class="command">in</span> <span class="argument">*.c</span>
+<span class="command">for</span> <span class="argument">i</span> <span class="command">in</span> <span class="file">*.c</span>
     <span class="command">if</span> <span class="binary">grep</span> <span class="argument">smurf</span> <span class="variable"><span class="operator">$</span>i</span>
         <span class="command">echo</span> <span class="argument">Smurfs</span> <span class="argument">are</span> <span class="argument">present</span> <span class="argument">in</span> <span class="variable"><span class="operator">$</span>i</span>
         <span class="command">break</span>
@@ -486,6 +512,7 @@ Description</h2>
 <p>If <code>DIRECTORY</code> is supplied, it will become the new directory. If no parameter is given, the contents of the <code>HOME</code> environment variable will be used.</p>
 <p>If <code>DIRECTORY</code> is a relative path, the paths found in the <code>CDPATH</code> environment variable array will be tried as prefixes for the specified path.</p>
 <p>Note that the shell will attempt to change directory without requiring <code>cd</code> if the name of a directory is provided (starting with <code>.</code>, <code>/</code> or <code>~</code>, or ending with <code>/</code>).</p>
+<p>Fish also ships a wrapper function around the builtin <code>cd</code> that understands <code>cd -</code> as changing to the previous directory. See also <a href="commands.html#prevd"><code>prevd</code></a>. This wrapper function maintains a history of the 25 most recently visited directories in the <code>$dirprev</code> and <code>$dirnext</code> global variables.</p>
 <h2><a class="anchor" id="cd-example"></a>
 Examples</h2>
  
@@ -541,7 +568,23 @@ Description</h2>
 <h2><a class="anchor" id="commandline-example"></a>
 Example</h2>
 <p><code>commandline -j $history[3]</code> replaces the job under the cursor with the third item from the command line history.</p>
-<p>Back to <a href="index.html#toc-commands">index</a>. </p><hr/>
+<p>If the commandline contains </p> 
+ <pre class="fish">
+<span class="prompt">&gt;</span> <span class="command">echo</span> <span class="variable"><span class="operator">$</span>fl</span><span class="cursor">o</span><span class="argument">under</span> <span class="redirect">&gt;&amp;2</span> <span class="redirect">|</span> <span class="binary">less</span><span class="redirect">;</span> <span class="command">and</span> <span class="command">echo</span> <span class="variable"><span class="operator">$</span>catfish</span>
+</pre><p>(with the cursor on the "o" of "flounder")</p>
+<p>Then the following invocations behave like this: </p> 
+ <pre class="fish">
+<span class="prompt">&gt;</span> <span class="command">commandline</span> <span class="argument">-t</span>
+<span class="variable"><span class="operator">$</span>flounder</span>
+<span class="prompt">&gt;</span> <span class="command">commandline</span> <span class="argument">-ct</span>
+<span class="variable"><span class="operator">$</span>fl</span>
+<span class="prompt">&gt;</span> <span class="command">commandline</span> <span class="argument">-b</span> <span class="comment">## or just commandline</span>
+<span class="command">echo</span> <span class="variable"><span class="operator">$</span>flounder</span> <span class="redirect">&gt;&amp;2</span> <span class="redirect">|</span> <span class="binary">less</span><span class="redirect">;</span> <span class="command">and</span> <span class="command">echo</span> <span class="variable"><span class="operator">$</span>catfish</span>
+<span class="prompt">&gt;</span> <span class="command">commandline</span> <span class="argument">-p</span>
+<span class="command">echo</span> <span class="variable"><span class="operator">$</span>flounder</span> <span class="redirect">&gt;&amp;2</span>
+<span class="prompt">&gt;</span> <span class="command">commandline</span> <span class="argument">-j</span>
+<span class="command">echo</span> <span class="variable"><span class="operator">$</span>flounder</span> <span class="redirect">&gt;&amp;2</span> <span class="redirect">|</span> <span class="binary">less</span>
+</pre><p>Back to <a href="index.html#toc-commands">index</a>. </p><hr/>
  <h1><a class="anchor" id="command"></a>
 command - run a program</h1>
 <h2><a class="anchor" id="command-synopsis"></a>
@@ -570,11 +613,18 @@ Synopsis</h2>
  
  <pre class="fish synopsis">
 <span class="command">complete</span> <span class="operator">(</span> <span class="argument">-c</span> <span class="redirect">|</span> <span class="argument">--command</span> <span class="redirect">|</span> <span class="argument">-p</span> <span class="redirect">|</span> <span class="argument">--path</span> <span class="operator">)</span> <span class="argument">COMMAND</span>
-        <span class="argument">[</span><span class="operator">(</span> <span class="argument">-s</span> <span class="redirect">|</span> <span class="argument">--short-option</span> <span class="operator">)</span> <span class="argument">SHORT_OPTION]</span>
-        <span class="argument">[</span><span class="operator">(</span> <span class="argument">-l</span> <span class="redirect">|</span> <span class="argument">--long-option</span> <span class="redirect">|</span> <span class="argument">-o</span> <span class="redirect">|</span> <span class="argument">--old-option</span> <span class="operator">)</span> <span class="argument">LONG_OPTION]</span>
+        <span class="argument">[</span><span class="operator">(</span> <span class="argument">-c</span> <span class="redirect">|</span> <span class="argument">--command</span> <span class="redirect">|</span> <span class="argument">-p</span> <span class="redirect">|</span> <span class="argument">--path</span> <span class="operator">)</span> <span class="argument">COMMAND]</span>...
+        <span class="argument">[</span><span class="operator">(</span> <span class="argument">-e</span> <span class="redirect">|</span> <span class="argument">--erase</span> <span class="operator">)</span>]
+        <span class="argument">[</span><span class="operator">(</span> <span class="argument">-s</span> <span class="redirect">|</span> <span class="argument">--short-option</span> <span class="operator">)</span> <span class="argument">SHORT_OPTION]</span>...
+        <span class="argument">[</span><span class="operator">(</span> <span class="argument">-l</span> <span class="redirect">|</span> <span class="argument">--long-option</span> <span class="redirect">|</span> <span class="argument">-o</span> <span class="redirect">|</span> <span class="argument">--old-option</span> <span class="operator">)</span> <span class="argument">LONG_OPTION]</span>...
         <span class="argument">[</span><span class="operator">(</span> <span class="argument">-a</span> <span class="redirect">|</span> <span class="argument">--arguments</span> <span class="operator">)</span> <span class="argument">OPTION_ARGUMENTS]</span>
-        <span class="argument">[</span><span class="operator">(</span> <span class="argument">-w</span> <span class="redirect">|</span> <span class="argument">--wraps</span> <span class="operator">)</span> <span class="argument">WRAPPED_COMMAND]</span>
+        <span class="argument">[</span><span class="operator">(</span> <span class="argument">-f</span> <span class="redirect">|</span> <span class="argument">--no-files</span> <span class="operator">)</span>]
+        <span class="argument">[</span><span class="operator">(</span> <span class="argument">-r</span> <span class="redirect">|</span> <span class="argument">--require-parameter</span> <span class="operator">)</span>]
+        <span class="argument">[</span><span class="operator">(</span> <span class="argument">-x</span> <span class="redirect">|</span> <span class="argument">--exclusive</span> <span class="operator">)</span>]
+        <span class="argument">[</span><span class="operator">(</span> <span class="argument">-w</span> <span class="redirect">|</span> <span class="argument">--wraps</span> <span class="operator">)</span> <span class="argument">WRAPPED_COMMAND]</span>...
+        <span class="argument">[</span><span class="operator">(</span> <span class="argument">-n</span> <span class="redirect">|</span> <span class="argument">--condition</span> <span class="operator">)</span> <span class="argument">CONDITION]</span>
         <span class="argument">[</span><span class="operator">(</span> <span class="argument">-d</span> <span class="redirect">|</span> <span class="argument">--description</span> <span class="operator">)</span> <span class="argument">DESCRIPTION]</span>
+<span class="command">complete</span> <span class="operator">(</span> <span class="argument">-C</span><span class="argument">[STRING]</span> <span class="redirect">|</span> <span class="argument">--do-complete</span>[=STRING] <span class="operator">)</span>
 </pre><h2><a class="anchor" id="complete-description"></a>
 Description</h2>
 <p>For an introduction to specifying completions, see <a href="index.html#completion-own">Writing your own completions</a> in the fish manual.</p>
@@ -582,29 +632,36 @@ Description</h2>
 <li><code>COMMAND</code> is the name of the command for which to add a completion.</li>
 <li><code>SHORT_OPTION</code> is a one character option for the command.</li>
 <li><code>LONG_OPTION</code> is a multi character option for the command.</li>
-<li><code>OPTION_ARGUMENTS</code> is parameter containing a space-separated list of possible option-arguments, which may contain subshells.</li>
+<li><code>OPTION_ARGUMENTS</code> is parameter containing a space-separated list of possible option-arguments, which may contain command substitutions.</li>
 <li><code>DESCRIPTION</code> is a description of what the option and/or option arguments do.</li>
-<li><code>-C STRING</code> or <code>--do-complete=STRING</code> makes complete try to find all possible completions for the specified string.</li>
-<li><code>-w WRAPPED_COMMAND</code> or <code>--wraps=WRAPPED_COMMAND</code> causes the specified command to inherit completions from the wrapped command.</li>
-<li><code>-e</code> or <code>--erase</code> implies that the specified completion should be deleted.</li>
-<li><code>-f</code> or <code>--no-files</code> specifies that the option specified by this completion may not be followed by a filename.</li>
-<li><code>-n</code> or <code>--condition</code> specifies a shell command that must return 0 if the completion is to be used. This makes it possible to specify completions that should only be used in some cases.</li>
-<li><code>-o</code> or <code>--old-option</code> implies that the command uses old long style options with only one dash.</li>
-<li><code>-p</code> or <code>--path</code> implies that the string <code>COMMAND</code> is the full path of the command.</li>
-<li><code>-r</code> or <code>--require-parameter</code> specifies that the option specified by this completion always must have an option argument, i.e. may not be followed by another option.</li>
-<li><code>-u</code> or <code>--unauthoritative</code> implies that there may be more options than the ones specified, and that fish should not assume that options not listed are spelling errors.</li>
-<li><code>-A</code> or <code>--authoritative</code> implies that there may be no more options than the ones specified, and that fish should assume that options not listed are spelling errors.</li>
+<li><code>-c COMMAND</code> or <code>--command COMMAND</code> specifies that <code>COMMAND</code> is the name of the command.</li>
+<li><code>-p COMMAND</code> or <code>--path COMMAND</code> specifies that <code>COMMAND</code> is the absolute path of the program (optionally containing wildcards).</li>
+<li><code>-e</code> or <code>--erase</code> deletes the specified completion.</li>
+<li><code>-s SHORT_OPTION</code> or <code>--short-option=SHORT_OPTION</code> adds a short option to the completions list.</li>
+<li><code>-l LONG_OPTION</code> or <code>--long-option=LONG_OPTION</code> adds a GNU style long option to the completions list.</li>
+<li><code>-o LONG_OPTION</code> or <code>--old-option=LONG_OPTION</code> adds an old style long option to the completions list (See below for details).</li>
+<li><code>-a OPTION_ARGUMENTS</code> or <code>--arguments=OPTION_ARGUMENTS</code> adds the specified option arguments to the completions list.</li>
+<li><code>-f</code> or <code>--no-files</code> specifies that the options specified by this completion may not be followed by a filename.</li>
+<li><code>-r</code> or <code>--require-parameter</code> specifies that the options specified by this completion always must have an option argument, i.e. may not be followed by another option.</li>
 <li><code>-x</code> or <code>--exclusive</code> implies both <code>-r</code> and <code>-f</code>.</li>
+<li><code>-w WRAPPED_COMMAND</code> or <code>--wraps=WRAPPED_COMMAND</code> causes the specified command to inherit completions from the wrapped command (See blow for details).</li>
+<li><code>-n</code> or <code>--condition</code> specifies a shell command that must return 0 if the completion is to be used. This makes it possible to specify completions that should only be used in some cases.</li>
+<li><code>-CSTRING</code> or <code>--do-complete=STRING</code> makes complete try to find all possible completions for the specified string.</li>
+<li><code>-C</code> or <code>--do-complete</code> with no argument makes complete try to find all possible completions for the current command line buffer. If the shell is not in interactive mode, an error is returned.</li>
 </ul>
 <p>Command specific tab-completions in <code>fish</code> are based on the notion of options and arguments. An option is a parameter which begins with a hyphen, such as '<code>-h</code>', '<code>-help</code>' or '<code>--help</code>'. Arguments are parameters that do not begin with a hyphen. Fish recognizes three styles of options, the same styles as the GNU version of the getopt library. These styles are:</p>
 <ul>
 <li>Short options, like '<code>-a</code>'. Short options are a single character long, are preceded by a single hyphen and may be grouped together (like '<code>-la</code>', which is equivalent to '<code>-l -a</code>'). Option arguments may be specified in the following parameter ('<code>-w 32</code>') or by appending the option with the value ('<code>-w32</code>').</li>
 <li>Old style long options, like '<code>-Wall</code>'. Old style long options can be more than one character long, are preceded by a single hyphen and may not be grouped together. Option arguments are specified in the following parameter ('<code>-ao null</code>').</li>
-<li>GNU style long options, like '<code>--colors</code>'. GNU style long options can be more than one character long, are preceded by two hyphens, and may not be grouped together. Option arguments may be specified in the following parameter ('<code>--quoting-style</code>') or by appending the option with a '<code>=</code>' and the value ('<code>--quoting-style=shell</code>'). GNU style long options may be abbreviated so long as the abbreviation is unique ('<code>--h</code>') is equivalent to '<code>--help</code>' if help is the only long option beginning with an 'h').</li>
+<li>GNU style long options, like '<code>--colors</code>'. GNU style long options can be more than one character long, are preceded by two hyphens, and may not be grouped together. Option arguments may be specified in the following parameter ('<code>--quoting-style shell</code>') or by appending the option with a '<code>=</code>' and the value ('<code>--quoting-style=shell</code>'). GNU style long options may be abbreviated so long as the abbreviation is unique ('<code>--h</code>') is equivalent to '<code>--help</code>' if help is the only long option beginning with an 'h').</li>
 </ul>
-<p>The options for specifying command name, command path, or command switches may all be used multiple times to specify multiple commands which have the same completion or multiple switches accepted by a command.</p>
-<p>The <code>-w</code> or <code>--wraps</code> options causes the specified command to inherit completions from another command. The inheriting command is said to "wrap" the inherited command. The wrapping command may have its own completions in addition to inherited ones. A command may wrap multiple commands, and wrapping is transitive: if A wraps B, and B wraps C, then A automatically inherits all of C's completions. Wrapping can be removed using the <code>-e</code> or <code>--erase</code> options.</p>
-<p>When erasing completions, it is possible to either erase all completions for a specific command by specifying <code>complete -e -c COMMAND</code>, or by specifying a specific completion option to delete by specifying either a long, short or old style option.</p>
+<p>The options for specifying command name and command path may be used multiple times to define the same completions for multiple commands.</p>
+<p>The options for specifying command switches and wrapped commands may be used multiple times to define multiple completions for the command(s) in a single call.</p>
+<p>Invoking <code>complete</code> multiple times for the same command adds the new definitions on top of any existing completions defined for the command.</p>
+<p>When <code>-a</code> or <code>--arguments</code> is specified in conjunction with long, short, or old style options, the specified arguments are only used as completions when attempting to complete an argument for any of the specified options. If <code>-a</code> or <code>--arguments</code> is specified without any long, short, or old style options, the specified arguments are used when completing any argument to the command (except when completing an option argument that was specified with <code>-r</code> or <code>--require-parameter</code>).</p>
+<p>Command substitutions found in <code>OPTION_ARGUMENTS</code> are not expected to return a space-separated list of arguments. Instead they must return a newline-separated list of arguments, and each argument may optionally have a tab character followed by the argument description. Any description provided in this way overrides a description given with <code>-d</code> or <code>--description</code>.</p>
+<p>The <code>-w</code> or <code>--wraps</code> options causes the specified command to inherit completions from another command. The inheriting command is said to "wrap" the inherited command. The wrapping command may have its own completions in addition to inherited ones. A command may wrap multiple commands, and wrapping is transitive: if A wraps B, and B wraps C, then A automatically inherits all of C's completions. Wrapping can be removed using the <code>-e</code> or <code>--erase</code> options. Note that wrapping only works for completions specified with <code>-c</code> or <code>--command</code> and are ignored when specifying completions with <code>-p</code> or <code>--path</code>.</p>
+<p>When erasing completions, it is possible to either erase all completions for a specific command by specifying <code>complete -c COMMAND -e</code>, or by specifying a specific completion option to delete by specifying either a long, short or old style option.</p>
 <h2><a class="anchor" id="complete-example"></a>
 Example</h2>
 <p>The short style option <code>-o</code> for the <code>gcc</code> command requires that a file follows it. This can be done using writing:</p>
@@ -624,7 +681,7 @@ Example</h2>
  
  <pre class="fish">
 <span class="command">complete</span> <span class="argument">-c</span> <span class="argument">rpm</span> <span class="argument">-n</span> <span class="string">"__fish_contains_opt -s e erase"</span> <span class="argument">-d</span> <span class="argument">nodeps</span> <span class="string">"Don't check dependencies"</span>
-</pre><p>where <code>__fish_contains_opt</code> is a function that checks the commandline buffer for the presence of a specified set of options.</p>
+</pre><p>where <code>__fish_contains_opt</code> is a function that checks the command line buffer for the presence of a specified set of options.</p>
 <p>To implement an alias, use the <code>-w</code> or <code>--wraps</code> option:</p>
  
  <pre class="fish">
@@ -680,7 +737,7 @@ Example</h2>
 <p>The following code removes all tmp files that do not contain the word smurf.</p>
  
  <pre class="fish">
-<span class="command">for</span> <span class="argument">i</span> <span class="command">in</span> <span class="argument">*.tmp</span>
+<span class="command">for</span> <span class="argument">i</span> <span class="command">in</span> <span class="file">*.tmp</span>
     <span class="command">if</span> <span class="binary">grep</span> <span class="argument">smurf</span> <span class="variable"><span class="operator">$</span>i</span>
         <span class="command">continue</span>
     <span class="command">end</span>
@@ -706,7 +763,7 @@ Example</h2>
 <span class="command">count</span> <span class="variable"><span class="operator">$</span>PATH</span>
 <span class="comment"># Returns the number of directories in the users PATH variable.</span>
 
-<span class="command">count</span> <span class="argument">*.txt</span>
+<span class="command">count</span> <span class="file">*.txt</span>
 <span class="comment"># Returns the number of files in the current working directory ending with the suffix '.txt'.</span>
 </pre><p>Back to <a href="index.html#toc-commands">index</a>. </p><hr/>
  <h1><a class="anchor" id="dirh"></a>
@@ -720,6 +777,7 @@ Synopsis</h2>
 Description</h2>
 <p><code>dirh</code> prints the current directory history. The current position in the history is highlighted using the color defined in the <code>fish_color_history_current</code> environment variable.</p>
 <p><code>dirh</code> does not accept any parameters.</p>
+<p>Note that the <code>cd</code> command limits directory history to the 25 most recently visited directories. The history is stored in the <code>$dirprev</code> and <code>$dirnext</code> variables.</p>
 <p>Back to <a href="index.html#toc-commands">index</a>. </p><hr/>
  <h1><a class="anchor" id="dirs"></a>
 dirs - print directory stack</h1>
@@ -728,9 +786,11 @@ Synopsis</h2>
  
  <pre class="fish synopsis">
 <span class="command">dirs</span>
+<span class="command">dirs</span> <span class="argument">-c</span>
 </pre><h2><a class="anchor" id="dirs-description"></a>
 Description</h2>
 <p><code>dirs</code> prints the current directory stack, as created by the <a href="#pushd"><code>pushd</code></a> command.</p>
+<p>With "-c", it clears the directory stack instead.</p>
 <p><code>dirs</code> does not accept any parameters.</p>
 <p>Back to <a href="index.html#toc-commands">index</a>. </p><hr/>
  <h1><a class="anchor" id="echo"></a>
@@ -932,6 +992,7 @@ Description</h2>
 <p><code>fish_indent</code> is used to indent a piece of fish code. <code>fish_indent</code> reads commands from standard input and outputs them to standard output.</p>
 <p>The following options are available:</p>
 <ul>
+<li><code>-d</code> or <code>--dump</code> dumps information about the parsed fish commands to stderr</li>
 <li><code>-i</code> or <code>--no-indent</code> do not indent commands; only reformat to one job per line</li>
 <li><code>-v</code> or <code>--version</code> displays the current fish version and then exits</li>
 <li><code>--ansi</code> colorizes the output using ANSI escape sequences, appropriate for the current $TERM, using the colors defined in the environment (such as <code>$fish_color_command</code>).</li>
@@ -958,10 +1019,22 @@ Example</h2>
  
  <pre class="fish">
 <span class="command">function</span> <span class="argument">fish_prompt</span> <span class="argument">-d</span> <span class="string">"Write out the prompt"</span>
-    <span class="argument">printf</span> <span class="string">'%s@%s%s%s%s&gt; '</span> <span class="operator">(</span><span class="binary">whoami</span><span class="operator">)</span> <span class="operator">(</span><span class="function">hostname</span> <span class="redirect">|</span> <span class="binary">cut</span> <span class="argument">-d</span> <span class="argument">.</span> <span class="argument">-f</span> <span class="argument">1</span><span class="operator">)</span> <span>\</span> 
-            <span class="operator">(</span><span class="command">set_color</span> <span class="variable"><span class="operator">$</span><span class="variable">fish_color_cwd</span></span><span class="operator">)</span> <span class="operator">(</span><span class="function">prompt_pwd</span><span class="operator">)</span> <span class="operator">(</span><span class="command">set_color</span> <span class="argument">normal</span><span class="operator">)</span>
+    <span class="command">printf</span> <span class="string">'<span>%</span>s<span>@</span><span>%</span>s<span>%</span>s<span>%</span>s<span>%</span>s&gt; '</span> <span class="operator">(</span><span class="binary">whoami</span><span class="operator">)</span> <span class="operator">(</span><span class="function">hostname</span> <span class="redirect">|</span> <span class="binary">cut</span> <span class="argument">-d</span> <span class="argument">.</span> <span class="argument">-f</span> <span class="argument">1</span><span class="operator">)</span> <span>\</span> 
+            <span class="operator">(</span><span class="command">set_color</span> <span class="variable"><span class="operator">$</span>fish_color_cwd</span><span class="operator">)</span> <span class="operator">(</span><span class="command">prompt_pwd</span><span class="operator">)</span> <span class="operator">(</span><span class="command">set_color</span> <span class="argument">normal</span><span class="operator">)</span>
 <span class="command">end</span>
 </pre><p>Back to <a href="index.html#toc-commands">index</a>. </p><hr/>
+ <h1><a class="anchor" id="fish_realpath"></a>
+fish_realpath - Convert a path to an absolute path without symlinks</h1>
+<h2><a class="anchor" id="fish_realpath-synopsis"></a>
+Synopsis</h2>
+ 
+ <pre class="fish synopsis">
+<span class="command">fish_realpath</span> <span class="argument">path</span>
+</pre><h2><a class="anchor" id="fish_realpath-description"></a>
+Description</h2>
+<p>This is an implementation of the external realpath command that doesn't support any options. It's meant to be used only by scripts which need to be portable. In general scripts shouldn't invoke this directly. They should just use <code>realpath</code> which will fallback to this builtin if an external command cannot be found.</p>
+<p>If the path is invalid no translated path will be written to stdout and an error will be reported. This implementation behaves like the GNU command being invoked with <code>--canonicalize-existing</code>.</p>
+<p>Back to <a href="index.html#toc-commands">index</a>. </p><hr/>
  <h1><a class="anchor" id="fish_right_prompt"></a>
 fish_right_prompt - define the appearance of the right-side command line prompt</h1>
 <h2><a class="anchor" id="fish_right_prompt-synopsis"></a>
@@ -981,7 +1054,7 @@ Example</h2>
  
  <pre class="fish">
 <span class="command">function</span> <span class="argument">fish_right_prompt</span> <span class="argument">-d</span> <span class="string">"Write out the right prompt"</span>
-    <span class="binary">date</span> <span class="string">"+%m/%d/%y"</span>
+    <span class="binary">date</span> <span class="string">'+<span>%</span>m/<span>%</span>d/<span>%</span>y'</span>
 <span class="command">end</span>
 </pre><p>Back to <a href="index.html#toc-commands">index</a>. </p><hr/>
  <h1><a class="anchor" id="fish"></a>
@@ -1014,8 +1087,7 @@ Description</h2>
 <p>This does not overwrite custom completions.</p>
 <p>There are no parameters for <code>fish_update_completions</code>.</p>
 <p>Back to <a href="index.html#toc-commands">index</a>. </p><hr/>
-<p> 408-600-6421</p>
-<h1><a class="anchor" id="fish_vi_mode"></a>
+ <h1><a class="anchor" id="fish_vi_mode"></a>
 fish_vi_mode - Enable vi mode</h1>
 <h2><a class="anchor" id="fish_vi_mode-synopsis"></a>
 Synopsis</h2>
@@ -1057,7 +1129,7 @@ Synopsis</h2>
 </pre><h2><a class="anchor" id="funced-description"></a>
 Description</h2>
 <p><code>funced</code> provides an interface to edit the definition of the function <code>NAME</code>.</p>
-<p>If the <code>$EDITOR</code> environment variable is set, it will be used as the program to edit the function. Otherwise, a built-in editor will be used.</p>
+<p>If the <code>$VISUAL</code> environment variable is set, it will be used as the program to edit the function. If <code>$VISUAL</code> is unset but <code>$EDITOR</code> is set, that will be used. Otherwise, a built-in editor will be used.</p>
 <p>If there is no function called <code>NAME</code> a new function will be created with the specified name</p>
 <ul>
 <li><code>-e command</code> or <code>--editor command</code> Open the function body inside the text editor given by the command (for example, "vi"). The command 'fish' will use the built-in editor.</li>
@@ -1074,6 +1146,7 @@ Synopsis</h2>
 </pre><h2><a class="anchor" id="funcsave-description"></a>
 Description</h2>
 <p><code>funcsave</code> saves the current definition of a function to a file in the fish configuration directory. This function will be automatically loaded by current and future fish sessions. This can be useful if you have interactively created a new function and wish to save it for later use.</p>
+<p>Note that because fish loads functions on-demand, saved functions will not function as <a href="index.html#event">event handlers</a> until they are run or sourced otherwise. To activate an event handler for every new shell, add the function to your <a href="index.html#initialization">shell initialization file</a> instead of using <code>funcsave</code>.</p>
 <p>Back to <a href="index.html#toc-commands">index</a>. </p><hr/>
  <h1><a class="anchor" id="functions"></a>
 functions - print or erase functions</h1>
@@ -1122,7 +1195,7 @@ function - create a function</h1>
 Synopsis</h2>
  
  <pre class="fish synopsis">
-<span class="command">function</span> <span class="argument">[OPTIONS]</span> <span class="argument">NAME</span><span class="redirect">;</span> <span class="argument">BODY</span><span class="redirect">;</span> <span class="command">end</span>
+<span class="command">function</span> <span class="argument">NAME</span> <span class="argument">[OPTIONS]</span><span class="redirect">;</span> <span class="argument">BODY</span><span class="redirect">;</span> <span class="command">end</span>
 </pre><h2><a class="anchor" id="function-description"></a>
 Description</h2>
 <p><code>function</code> creates a new function <code>NAME</code> with the body <code>BODY</code>.</p>
@@ -1179,7 +1252,7 @@ Example</h2>
  <pre class="fish">
 <span class="command">function</span> <span class="argument">notify</span>
     <span class="command">set</span> <span class="argument">-l</span> <span class="argument">job</span> <span class="operator">(</span><span class="command">jobs</span> <span class="argument">-l</span> <span class="argument">-g</span><span class="operator">)</span>
-    <span class="command">or</span> <span class="command">begin</span><span class="redirect">;</span> <span class="command">echo</span> <span class="string">"There are no jobs"</span> &gt;<span class="redirect">&amp;</span><span class="redirect">;</span> <span class="command">return</span> <span class="argument">1</span><span class="redirect">;</span> <span class="command">end</span>
+    <span class="command">or</span> <span class="command">begin</span><span class="redirect">;</span> <span class="command">echo</span> <span class="string">"There are no jobs"</span> <span class="redirect">&gt;&amp;2</span><span class="redirect">;</span> <span class="command">return</span> <span class="argument">1</span><span class="redirect">;</span> <span class="command">end</span>
 
     <span class="command">function</span> _notify_job_<span class="variable"><span class="operator">$</span>job</span> <span class="argument">--on-job-exit</span> <span class="variable"><span class="operator">$</span>job</span> <span class="argument">--inherit-variable</span> <span class="argument">job</span>
         <span class="command">echo</span> <span class="argument">-n</span> <span class="argument"><span>\</span>a</span> <span class="comment">## beep</span>
@@ -1253,7 +1326,7 @@ Synopsis</h2>
 </pre><h2><a class="anchor" id="if-description"></a>
 Description</h2>
 <p><code>if</code> will execute the command <code>CONDITION</code>. If the condition's exit status is 0, the commands <code>COMMANDS_TRUE</code> will execute. If the exit status is not 0 and <code>else</code> is given, <code>COMMANDS_FALSE</code> will be executed.</p>
-<p>In order to use the exit status of multiple commands as the condition of an if block, use <a href="#begin"><code>begin; ...; end</code></a> and the short circuit commands <a href="commands.html#and"><code>and</code></a> and <a href="commands.html#or"><code>or</code></a>.</p>
+<p>You can use <a href="#and"><code>and</code></a> or <a href="#and"><code>or</code></a> in the condition. See the second example below.</p>
 <p>The exit status of the last foreground command to exit can always be accessed using the <a href="index.html#variables-status">$status</a> variable.</p>
 <h2><a class="anchor" id="if-example"></a>
 Example</h2>
@@ -1266,6 +1339,12 @@ Example</h2>
     <span class="command">echo</span> <span class="argument">bar.txt</span> <span class="argument">exists</span>
 <span class="command">else</span>
     <span class="command">echo</span> <span class="argument">foo.txt</span> <span class="argument">and</span> <span class="argument">bar.txt</span> <span class="argument">do</span> <span class="argument">not</span> <span class="argument">exist</span>
+<span class="command">end</span>
+</pre><p>The following code will print "foo.txt exists and is readable" if foo.txt is a regular file and readable </p> 
+ <pre class="fish">
+<span class="command">if</span> <span class="command">test</span> <span class="argument">-f</span> <span class="file">foo.txt</span>
+   <span class="command">and</span> <span class="command">test</span> <span class="argument">-r</span> <span class="file">foo.txt</span>
+   <span class="command">echo</span> <span class="string">"foo.txt exists and is readable"</span>
 <span class="command">end</span>
 </pre><p>Back to <a href="index.html#toc-commands">index</a>. </p><hr/>
  <h1><a class="anchor" id="isatty"></a>
@@ -1335,28 +1414,6 @@ Examples</h2>
 <p><code>math 1+1</code> outputs 2.</p>
 <p><code>math $status-128</code> outputs the numerical exit status of the last command minus 128.</p>
 <p>Back to <a href="index.html#toc-commands">index</a>. </p><hr/>
- <h1><a class="anchor" id="mimedb"></a>
-mimedb - lookup file information via the mime database</h1>
-<h2><a class="anchor" id="mimedb-synopsis"></a>
-Synopsis</h2>
- 
- <pre class="fish synopsis">
-<span class="command">mimedb</span> <span class="argument">[OPTIONS]</span> <span class="argument">FILES...</span>
-</pre><h2><a class="anchor" id="mimedb-description"></a>
-Description</h2>
-<p><code>mimedb</code> queries the MIME type database and the <code>.desktop</code> files installed on the system in order to find information on the files listed in <code>FILES</code>. The information that <code>mimedb</code> can retrieve includes the MIME type for a file, a description of the type, and the default action that can be performed on the file. <code>mimedb</code> can also be used to launch the default action for this file.</p>
-<p>The following options are available:</p>
-<ul>
-<li><code>-t</code>, <code>--input-file-data</code> determines the files' type both by their filename and by their contents (default behaviour).</li>
-<li><code>-f</code>, <code>--input-filename</code> determines the files' type by their filename.</li>
-<li><code>-i</code>, <code>--input-mime</code> specifies that the arguments are not files, but MIME types.</li>
-<li><code>-m</code>, <code>--output-mime</code> outputs the MIME type of each file (default behaviour).</li>
-<li><code>-f</code>, <code>--output-description</code> outputs the description of each MIME type.</li>
-<li><code>-a</code>, <code>--output-action</code> outputs the default action of each MIME type.</li>
-<li><code>-l</code>, <code>--launch</code> launches the default action for the specified files.</li>
-<li><code>-v</code>, <code>--version</code> displays the version number and exits.</li>
-</ul>
-<p>Back to <a href="index.html#toc-commands">index</a>. </p><hr/>
  <h1><a class="anchor" id="nextd"></a>
 nextd - move forward through directory history</h1>
 <h2><a class="anchor" id="nextd-synopsis"></a>
@@ -1368,6 +1425,7 @@ Synopsis</h2>
 Description</h2>
 <p><code>nextd</code> moves forwards <code>POS</code> positions in the history of visited directories; if the end of the history has been hit, a warning is printed.</p>
 <p>If the <code>-l</code> or <code>--list</code> flag is specified, the current directory history is also displayed.</p>
+<p>Note that the <code>cd</code> command limits directory history to the 25 most recently visited directories. The history is stored in the <code>$dirprev</code> and <code>$dirnext</code> variables which this command manipulates.</p>
 <h2><a class="anchor" id="nextd-example"></a>
 Example</h2>
  
@@ -1413,7 +1471,7 @@ Synopsis</h2>
 <span class="command">open</span> <span class="argument">FILES...</span>
 </pre><h2><a class="anchor" id="open-description"></a>
 Description</h2>
-<p><code>open</code> opens a file in its default application, using the <code>xdg-open</code> command if it exists, or else the <a href="commands.html#mimedb">mimedb</a> command.</p>
+<p><code>open</code> opens a file in its default application, using the appropriate tool for the operating system. On GNU/Linux, this requires the common but optional <code>xdg-open</code> utility, from the <code>xdg-utils</code> package.</p>
 <h2><a class="anchor" id="open-example"></a>
 Example</h2>
 <p><code>open *.txt</code> opens all the text files in the current directory using your system's default text editor.</p>
@@ -1427,9 +1485,9 @@ Synopsis</h2>
 <span class="argument">COMMAND1</span><span class="redirect">;</span> <span class="command">or</span> <span class="argument">COMMAND2</span>
 </pre><h2><a class="anchor" id="or-description"></a>
 Description</h2>
-<p><code>or</code> is used to execute a command if the current exit status (as set by the last previous command) is not 0.</p>
-<p><code>or</code> does not change the current exit status.</p>
-<p>The exit status of the last foreground command to exit can always be accessed using the <a href="index.html#variables-status">$status</a> variable.</p>
+<p><code>or</code> is used to execute a command if the current exit status (as set by the previous command) is not 0.</p>
+<p><code>or</code> statements may be used as part of the condition in an <a href="#if"><code>and</code></a> or <a href="#while"><code>while</code></a> block. See the documentation for <a href="#if"><code>if</code></a> and <a href="#while"><code>while</code></a> for examples.</p>
+<p><code>or</code> does not change the current exit status. The exit status of the last foreground command to exit can always be accessed using the <a href="index.html#variables-status">$status</a> variable.</p>
 <h2><a class="anchor" id="or-example"></a>
 Example</h2>
 <p>The following code runs the <code>make</code> command to build a program. If the build succeeds, the program is installed. If either step fails, <code>make clean</code> is run, which removes the files created by the build process.</p>
@@ -1474,6 +1532,7 @@ Synopsis</h2>
 Description</h2>
 <p><code>prevd</code> moves backwards <code>POS</code> positions in the history of visited directories; if the beginning of the history has been hit, a warning is printed.</p>
 <p>If the <code>-l</code> or <code>--list</code> flag is specified, the current history is also displayed.</p>
+<p>Note that the <code>cd</code> command limits directory history to the 25 most recently visited directories. The history is stored in the <code>$dirprev</code> and <code>$dirnext</code> variables which this command manipulates.</p>
 <h2><a class="anchor" id="prevd-example"></a>
 Example</h2>
  
@@ -1490,23 +1549,113 @@ Example</h2>
 <span class="command">nextd</span>
 <span class="comment"># Working directory is now /usr/src/fish-shell</span>
 </pre><p>Back to <a href="index.html#toc-commands">index</a>. </p><hr/>
+ <h1><a class="anchor" id="printf"></a>
+printf - display text according to a format string</h1>
+<h2><a class="anchor" id="printf-synopsis"></a>
+Synopsis</h2>
+ 
+ <pre class="fish synopsis">
+<span class="command">printf</span> <span class="argument">format</span> <span class="argument">[argument...]</span>
+</pre><h2><a class="anchor" id="printf-description"></a>
+Description</h2>
+<p>printf formats the string FORMAT with ARGUMENT, and displays the result.</p>
+<p>The string FORMAT should contain format specifiers, each of which are replaced with successive arguments according to the specifier. Specifiers are detailed below, and are taken from the C library function <code>printf(3)</code>.</p>
+<p>Unlike <code>echo</code>, <code>printf</code> does not append a new line unless it is specified as part of the string.</p>
+<p>Valid format specifiers are:</p>
+<ul>
+<li><code>%d</code>: Argument will be used as decimal integer (signed or unsigned)</li>
+<li><code>%i</code>: Argument will be used as a signed integer</li>
+<li><code>%o</code>: An octal unsigned integer</li>
+<li><code>%u</code>: An unsigned decimal integer</li>
+<li><code>%x</code> or <code>%X</code>: An unsigned hexadecimal integer</li>
+<li><code>%f</code>, <code>%g</code> or <code>%G</code>: A floating-point number</li>
+<li><code>%e</code> or <code>%E</code>: A floating-point number in scientific (XXXeYY) notation</li>
+<li><code>%s</code>: A string</li>
+<li><code>%b</code>: As a string, interpreting backslash escapes, except that octal escapes are of the form \0 or \0ooo.</li>
+</ul>
+<p><code>%%</code> signifies a literal "%".</p>
+<p>Note that conversion may fail, e.g. "102.234" will not losslessly convert to an integer, causing printf to print an error.</p>
+<p>printf also knows a number of backslash escapes:</p><ul>
+<li><code>\"</code> double quote</li>
+<li><code>\\</code> backslash</li>
+<li><code>\a</code> alert (bell)</li>
+<li><code>\b</code> backspace</li>
+<li><code>\c</code> produce no further output</li>
+<li><code>\e</code> escape</li>
+<li><code>\f</code> form feed</li>
+<li><code>\n</code> new line</li>
+<li><code>\r</code> carriage return</li>
+<li><code>\t</code> horizontal tab</li>
+<li><code>\v</code> vertical tab</li>
+<li><code>\ooo</code> octal number (ooo is 1 to 3 digits)</li>
+<li><code>\xhh</code> hexadecimal number (hhh is 1 to 2 digits)</li>
+<li><code>\uhhhh</code> 16-bit Unicode character (hhhh is 4 digits)</li>
+<li><code>\Uhhhhhhhh</code> 32-bit Unicode character (hhhhhhhh is 8 digits)</li>
+</ul>
+<p>The `format' argument is re-used as many times as necessary to convert all of the given arguments. If a format specifier is not appropriate for the given argument, an error is printed. For example, `printf 'd' "102.234"` produces an error, as "102.234" cannot be formatted as an integer.</p>
+<p>This file has been imported from the printf in GNU Coreutils version 6.9. If you would like to use a newer version of printf, for example the one shipped with your OS, try <code>command printf</code>.</p>
+<h2><a class="anchor" id="printf-example"></a>
+Example</h2>
+ 
+ <pre class="fish">
+<span class="command">printf</span> <span class="string">'<span>%</span>s<span>\</span>t<span>%</span>s<span>\</span>n'</span> <span class="argument">flounder</span> <span class="argument">fish</span>
+</pre><p>Will print "flounder    fish" (separated with a tab character), followed by a newline character. This is useful for writing completions, as fish expects completion scripts to output the option followed by the description, separated with a tab character.</p>
+ 
+ <pre class="fish">
+<span class="command">printf</span> <span class="string">'<span>%</span>s:<span>%</span>d'</span> <span class="string">"Number of bananas in my pocket"</span> <span class="argument">42</span>
+</pre><p>Will print "Number of bananas in my pocket: 42", <em>without</em> a newline.</p>
+<p>Back to <a href="index.html#toc-commands">index</a>. </p><hr/>
+ <h1><a class="anchor" id="prompt_pwd"></a>
+prompt_pwd - Print pwd suitable for prompt</h1>
+<h2><a class="anchor" id="prompt_pwd-synopsis"></a>
+Synopsis</h2>
+ 
+ <pre class="fish synopsis">
+<span class="command">prompt_pwd</span>
+</pre><h2><a class="anchor" id="prompt_pwd-description"></a>
+Description</h2>
+<p>prompt_pwd is a function to print the current working directory in a way suitable for prompts. It will replace the home directory with "~" and shorten every path component but the last to a default of one character.</p>
+<p>To change the number of characters per path component, set $fish_prompt_pwd_dir_length to the number of characters. Setting it to 0 or an invalid value will disable shortening entirely.</p>
+<h2><a class="anchor" id="prompt_pwd-example"></a>
+Examples</h2>
+ 
+ <pre class="fish cli-dark">
+<span class="prompt">&gt;</span> <span class="command">cd</span> <span class="path">~/</span>
+<span class="prompt">&gt;</span> <span class="command">echo</span> <span class="variable"><span class="operator">$</span>PWD</span>
+<span class="output">/home/alfa</span>
+
+<span class="prompt">&gt;</span> <span class="command">prompt_pwd</span>
+<span class="output">~</span>
+
+<span class="prompt">&gt;</span> <span class="command">cd</span> <span class="path">/tmp/banana/sausage/with/mustard</span>
+<span class="prompt">&gt;</span> <span class="command">prompt_pwd</span>
+<span class="output">/t/b/s/w/mustard</span>
+
+<span class="prompt">&gt;</span> <span class="command">set</span> <span class="argument">-g</span> <span class="argument">fish_prompt_pwd_dir_length</span> <span class="argument">3</span>
+<span class="prompt">&gt;</span> <span class="command">prompt_pwd</span>
+<span class="output">/tmp/ban/sau/wit/mustard</span>
+</pre><p>Back to <a href="index.html#toc-commands">index</a>. </p><hr/>
  <h1><a class="anchor" id="psub"></a>
 psub - perform process substitution</h1>
 <h2><a class="anchor" id="psub-synopsis"></a>
 Synopsis</h2>
  
  <pre class="fish synopsis">
-<span class="argument">COMMAND1</span> <span class="operator">(</span> <span class="argument">COMMAND2</span> <span class="redirect">|</span> <span class="command">psub</span> <span class="argument">[</span><span class="argument">-f</span>] <span class="operator">)</span>
+<span class="argument">COMMAND1</span> <span class="operator">(</span> <span class="argument">COMMAND2</span> <span class="redirect">|</span> <span class="command">psub</span> <span class="argument">[</span><span class="argument">-f</span>] <span class="argument">[</span><span class="argument">-s</span> <span class="argument">SUFFIX]</span><span class="operator">)</span>
 </pre><h2><a class="anchor" id="psub-description"></a>
 Description</h2>
 <p>Posix shells feature a syntax that is a mix between command substitution and piping, called process substitution. It is used to send the output of a command into the calling command, much like command substitution, but with the difference that the output is not sent through commandline arguments but through a named pipe, with the filename of the named pipe sent as an argument to the calling program. <code>psub</code> combined with a regular command substitution provides the same functionality.</p>
 <p>If the <code>-f</code> or <code>--file</code> switch is given to <code>psub</code>, <code>psub</code> will use a regular file instead of a named pipe to communicate with the calling process. This will cause <code>psub</code> to be significantly slower when large amounts of data are involved, but has the advantage that the reading process can seek in the stream.</p>
+<p>If the <code>-s</code> or <code>---suffix</code> switch is given, <code>psub</code> will append SUFFIX to the filename.</p>
 <h2><a class="anchor" id="psub-example"></a>
 Example</h2>
  
  <pre class="fish">
 <span class="binary">diff</span> <span class="operator">(</span><span class="binary">sort</span> <span class="file">a.txt</span> <span class="redirect">|</span> <span class="command">psub</span><span class="operator">)</span> <span class="operator">(</span><span class="binary">sort</span> <span class="file">b.txt</span> <span class="redirect">|</span> <span class="command">psub</span><span class="operator">)</span>
 <span class="comment"># shows the difference between the sorted versions of files `a.txt` and `b.txt`.</span>
+
+<span class="command">source</span>-<span class="argument">highlight</span> <span class="argument">-f</span> <span class="argument">esc</span> <span class="operator">(</span>cpp <span class="file">main.c</span> <span class="redirect">|</span> <span class="command">psub</span> <span class="argument">-s</span> <span class="argument">.c</span><span class="operator">)</span>
+<span class="comment"># highlights `main.c` after preprocessing as a C source.</span>
 </pre><p>Back to <a href="index.html#toc-commands">index</a>. </p><hr/>
  <h1><a class="anchor" id="pushd"></a>
 pushd - push directory to directory stack</h1>
@@ -1518,6 +1667,10 @@ Synopsis</h2>
 </pre><h2><a class="anchor" id="pushd-description"></a>
 Description</h2>
 <p>The <code>pushd</code> function adds <code>DIRECTORY</code> to the top of the directory stack and makes it the current working directory. <a href="#popd"><code>popd</code></a> will pop it off and return to the original directory.</p>
+<p>Without arguments, it exchanges the top two directories in the stack.</p>
+<p><code>pushd +NUMBER</code> rotates the stack counter-clockwise i.e. from bottom to top</p>
+<p><code>pushd -NUMBER</code> rotates clockwise i.e. top to bottom.</p>
+<p>See also <code>dirs</code> and <code>dirs -c</code>.</p>
 <h2><a class="anchor" id="pushd-example"></a>
 Example</h2>
  
@@ -1530,9 +1683,17 @@ Example</h2>
 <span class="comment"># Working directory is now /usr/src/fish-shell</span>
 <span class="comment"># Directory stack contains /usr/src /usr/src/fish-shell</span>
 
-<span class="command">popd</span>
+<span class="command">pushd</span> <span class="path">/tmp/</span>
+<span class="comment"># Working directory is now /tmp</span>
+<span class="comment"># Directory stack contains /tmp /usr/src /usr/src/fish-shell</span>
+
+<span class="command">pushd</span> <span class="argument">+1</span>
 <span class="comment"># Working directory is now /usr/src</span>
-<span class="comment"># Directory stack contains /usr/src</span>
+<span class="comment"># Directory stack contains /usr/src /usr/src/fish-shell /tmp</span>
+
+<span class="command">popd</span>
+<span class="comment"># Working directory is now /usr/src/fish-shell</span>
+<span class="comment"># Directory stack contains /usr/src/fish-shell /tmp</span>
 </pre><p>Back to <a href="index.html#toc-commands">index</a>. </p><hr/>
  <h1><a class="anchor" id="pwd"></a>
 pwd - output the current working directory</h1>
@@ -1555,7 +1716,7 @@ Synopsis</h2>
 <span class="command">random</span> <span class="argument">[SEED]</span>
 </pre><h2><a class="anchor" id="random-description"></a>
 Description</h2>
-<p><code>random</code> outputs a random number from 0 to 32766, inclusive.</p>
+<p><code>random</code> outputs a psuedo-random number from 0 to 32767, inclusive. Even ignoring the very narrow range of values you should not assume this produces truly random values within that range. Do not use the value for any cryptographic purposes, and take care to handle collisions: the same random number appearing more than once in a given fish instance.</p>
 <p>If a <code>SEED</code> value is provided, it is used to seed the random number generator, and no output will be produced. This can be useful for debugging purposes, where it can be desirable to get the same random number sequence multiple times. If the random number generator is called without first seeding it, the current time will be used as the seed.</p>
 <h2><a class="anchor" id="random-example"></a>
 Example</h2>
@@ -1632,8 +1793,8 @@ Synopsis</h2>
 <span class="command">set_color</span> <span class="argument">[OPTIONS]</span> <span class="argument">[COLOR]</span>
 </pre><h2><a class="anchor" id="set_color-description"></a>
 Description</h2>
-<p><code>set_color</code> changes the foreground and/or background color of the terminal. <code>COLOR</code> is one of black, red, green, brown, yellow, blue, magenta, purple, cyan, white and normal.</p>
-<p>If your terminal supports term256 (modern xterms and OS X Lion), you can specify an RGB value with three or six hex digits, such as A0FF33 or f2f. <code>fish</code> will choose the closest supported color.</p>
+<p><code>set_color</code> changes the foreground and/or background color of the terminal. <code>COLOR</code> is one of <code>black</code>, <code>red</code>, <code>green</code>, <code>brown</code>, <code>yellow</code>, <code>blue</code>, <code>magenta</code>, <code>purple</code>, <code>cyan</code>, <code>brred</code>, <code>brgreen</code>, <code>brbrown</code>, <code>bryellow</code>, <code>brblue</code>, <code>brmagenta</code>, <code>brpurple</code>, <code>brcyan</code>, <code>white</code>. The <code>br</code>, bright, forms are most useful as background colors. The special color <code>normal</code> resets the background and foreground to whatever is normal for your terminal.</p>
+<p>You can also specify an RGB value with three or six hex digits, such as A0FF33 or f2f. <code>fish</code> will choose the closest supported color. A three digit value is equivalent to specifying each digit twice; e.g., <code>#2BC</code> is the same as <code>#22BBCC</code>. Hex RGB values can be in lower or uppercase, optionally prefixed with the pound-sign character. Depending on the capabilities of your terminal the actual color may be approximated by the closest known matching color in the <a href="https://en.wikipedia.org/wiki/ANSI_escape_code#Colors">ANSI X3.64</a> color palette.</p>
 <p>The following options are available:</p>
 <ul>
 <li><code>-b</code>, <code>--background</code> <code>COLOR</code> sets the background color.</li>
@@ -1641,10 +1802,11 @@ Description</h2>
 <li><code>-o</code>, <code>--bold</code> sets bold or extra bright mode.</li>
 <li><code>-u</code>, <code>--underline</code> sets underlined mode.</li>
 </ul>
-<p>Calling <code>set_color normal</code> will set the terminal color to the default color of the terminal.</p>
-<p>Some terminals use the <code>--bold</code> escape sequence to switch to a brighter color set. On such terminals, <code>set_color white</code> will result in a grey font color, while <code>set_color --bold white</code> will result in a white font color.</p>
+<p>Calling <code>set_color normal</code> will set the terminal background and foreground colors to the defaults for the terminal.</p>
+<p>Some terminals use the <code>--bold</code> escape sequence to switch to a brighter color set rather than bolding the characters. This only applies to the foreground color. You should probably use the <code>br</code> color name variants listed above for both the foreground and background "bright" colors rather than use this option. The only use for this option is on a black&amp;white terminal (e.g., a DEC VT220) to select foreground black text that is bolder than the normal text.</p>
 <p>Not all terminal emulators support all these features.</p>
-<p><code>set_color</code> uses the terminfo database to look up how to change terminal colors on whatever terminal is in use. Some systems have old and incomplete terminfo databases, and may lack color information for terminals that support it.</p>
+<p>Note 1: Setting either color to "normal" will reset both background and foreground colors to whatever is the default for the terminal.</p>
+<p>Note 2: Setting the background color only affects subsequently written characters. Fish provides no way to set the background color for the entire terminal window. Configuring the window background color (and other attributes such as its opacity) has to be done using whatever mechanisms the terminal provides.</p>
 <h2><a class="anchor" id="set_color-example"></a>
 Examples</h2>
  
@@ -1652,8 +1814,13 @@ Examples</h2>
 <span class="command">set_color</span> <span class="argument">red</span><span class="redirect">;</span> <span class="command">echo</span> <span class="string">"Roses are red"</span>
 <span class="command">set_color</span> <span class="argument">blue</span><span class="redirect">;</span> <span class="command">echo</span> <span class="string">"Violets are blue"</span>
 <span class="command">set_color</span> <span class="argument">62A</span><span class="redirect">;</span> <span class="command">echo</span> <span class="string">"Eggplants are dark purple"</span>
-<span class="command">set_color</span> <span class="argument">normal</span><span class="redirect">;</span> <span class="command">echo</span> <span class="string">"Normal is nice too"</span>
-</pre><p>Back to <a href="index.html#toc-commands">index</a>. </p><hr/>
+<span class="command">set_color</span> <span class="argument">normal</span><span class="redirect">;</span> <span class="command">echo</span> <span class="string">"Normal is nice"</span> <span class="comment">## This will reset background, too</span>
+</pre><h2><a class="anchor" id="set_color-detection"></a>
+Terminal Capability Detection</h2>
+<p>Fish uses a heuristic to decide if your terminal supports the 256 color palette (as opposed to the more limited 16 color palette of older terminals). If you've done the equivalent of <code>set fish_term256 1</code> that will be true. If the $TERM value contains "256color" (e.g., "xterm-256color") that will be true. If your $TERM value is "xterm" and $TERM_PROGRAM is not set to "Apple_Terminal" that will be true. If your terminal supports the full 256 color palette (which is pretty much every color terminal emulator written in the past decade) you should ensure one of the aforementioned conditions is true.</p>
+<p>Many terminals support 24-bit (i.e., true-color) color escape sequences. This includes modern xterms, Gnome Terminal, KDE Konsole, and iTerm2. Fish currently does some limited attempts to detect whether a given <code>$TERM</code> supports 24-bit colors. You can explicitly enable that support via <code>set fish_term24bit 1</code>. If you do so fish will not map your RGB color values to the closest known matching color in the ANSI X3.64 color palette.</p>
+<p>The <code>set_color</code> command uses the terminfo database to look up how to change terminal colors on whatever terminal is in use. Some systems have old and incomplete terminfo databases, and may lack color information for terminals that support it. Fish will use the <a href="https://en.wikipedia.org/wiki/ANSI_escape_code">ANSI X3.64</a> escape sequences if the terminfo definition says less than 256 colors are supported; otherwise it will use the terminfo definition.</p>
+<p>Back to <a href="index.html#toc-commands">index</a>. </p><hr/>
  <h1><a class="anchor" id="set"></a>
 set - display and change shell variables.</h1>
 <h2><a class="anchor" id="set-synopsis"></a>
@@ -1734,7 +1901,7 @@ Synopsis</h2>
 <span class="command">source</span> <span class="argument">FILENAME</span> <span class="argument">[ARGUMENTS...]</span>
 </pre><h2><a class="anchor" id="source-description"></a>
 Description</h2>
-<p><code>source</code> evaluates the commands of the specified file in the current shell. This is different from starting a new process to perform the commands (i.e. <code>fish &lt; FILENAME</code>) since the commands will be evaluated by the current shell, which means that changes in shell variables will affect the current shell. If additional arguments are specified after the file name, they will be inserted into the $argv variable.</p>
+<p><code>source</code> evaluates the commands of the specified file in the current shell. This is different from starting a new process to perform the commands (i.e. <code>fish &lt; FILENAME</code>) since the commands will be evaluated by the current shell, which means that changes in shell variables will affect the current shell. If additional arguments are specified after the file name, they will be inserted into the <code>$argv</code> variable. The <code>$argv</code> variable will not include the name of the sourced file.</p>
 <p>If no file is specified, or if the file name '<code>-</code>' is used, stdin will be read.</p>
 <p>The return status of <code>source</code> is the return status of the last job to execute. If something goes wrong while opening or reading the file, <code>source</code> exits with a non-zero status.</p>
 <p><code>.</code> (a single period) is an alias for the <code>source</code> command. The use of <code>.</code> is deprecated in favour of <code>source</code>, and <code>.</code> will be removed in a future version of fish.</p>
@@ -1744,7 +1911,10 @@ Example</h2>
  <pre class="fish">
 <span class="command">source</span> <span class="path">~/.config/fish/config.fish</span>
 <span class="comment"># Causes fish to re-read its initialization file.</span>
-</pre><p>Back to <a href="index.html#toc-commands">index</a>. </p><hr/>
+</pre><h2><a class="anchor" id="Caveats"></a>
+Caveats</h2>
+<p>In fish versions prior to 2.3.0 the <code>$argv</code> variable would have a single element (the name of the sourced file) if no arguments are present. Otherwise it would contain arguments without the name of the sourced file. That behavior was very confusing and unlike other shells such as bash and zsh.</p>
+<p>Back to <a href="index.html#toc-commands">index</a>. </p><hr/>
  <h1><a class="anchor" id="status"></a>
 status - query fish runtime information</h1>
 <h2><a class="anchor" id="status-synopsis"></a>
@@ -1769,6 +1939,182 @@ Description</h2>
 <li><code>-j CONTROLTYPE</code> or <code>--job-control=CONTROLTYPE</code> sets the job control type, which can be <code>none</code>, <code>full</code>, or <code>interactive</code>.</li>
 <li><code>-t</code> or <code>--print-stack-trace</code> prints a stack trace of all function calls on the call stack.</li>
 </ul>
+<p>Back to <a href="index.html#toc-commands">index</a>. </p><hr/>
+ <h1><a class="anchor" id="string"></a>
+string - manipulate strings</h1>
+<h2><a class="anchor" id="string-synopsis"></a>
+Synopsis</h2>
+ 
+ <pre class="fish synopsis">
+<span class="command">string</span> <span class="argument">length</span> <span class="argument">[</span><span class="operator">(</span><span class="argument">-q</span> <span class="redirect">|</span> <span class="argument">--quiet</span><span class="operator">)</span>] <span class="argument">[STRING...]</span>
+<span class="command">string</span> <span class="argument">sub</span> <span class="argument">[</span><span class="operator">(</span><span class="argument">-s</span> <span class="redirect">|</span> <span class="argument">--start</span><span class="operator">)</span> <span class="argument">START]</span> <span class="argument">[</span><span class="operator">(</span><span class="argument">-l</span> <span class="redirect">|</span> <span class="argument">--length</span><span class="operator">)</span> <span class="argument">LENGTH]</span> <span class="argument">[</span><span class="operator">(</span><span class="argument">-q</span> <span class="redirect">|</span> <span class="argument">--quiet</span><span class="operator">)</span>]
+           <span class="argument">[STRING...]</span>
+<span class="command">string</span> <span class="argument">split</span> <span class="argument">[</span><span class="operator">(</span><span class="argument">-m</span> <span class="redirect">|</span> <span class="argument">--max</span><span class="operator">)</span> <span class="argument">MAX]</span> <span class="argument">[</span><span class="operator">(</span><span class="argument">-r</span> <span class="redirect">|</span> <span class="argument">--right</span><span class="operator">)</span>] <span class="argument">[</span><span class="operator">(</span><span class="argument">-q</span> <span class="redirect">|</span> <span class="argument">--quiet</span><span class="operator">)</span>] <span class="argument">SEP</span>
+             <span class="argument">[STRING...]</span>
+<span class="command">string</span> <span class="argument">join</span> <span class="argument">[</span><span class="operator">(</span><span class="argument">-q</span> <span class="redirect">|</span> <span class="argument">--quiet</span><span class="operator">)</span>] <span class="argument">SEP</span> <span class="argument">[STRING...]</span>
+<span class="command">string</span> <span class="argument">trim</span> <span class="argument">[</span><span class="operator">(</span><span class="argument">-l</span> <span class="redirect">|</span> <span class="argument">--left</span><span class="operator">)</span>] <span class="argument">[</span><span class="operator">(</span><span class="argument">-r</span> <span class="redirect">|</span> <span class="argument">--right</span><span class="operator">)</span>] <span class="argument">[</span><span class="operator">(</span><span class="argument">-c</span> <span class="redirect">|</span> <span class="argument">--chars</span> <span class="argument">CHARS</span><span class="operator">)</span>]
+            <span class="argument">[</span><span class="operator">(</span><span class="argument">-q</span> <span class="redirect">|</span> <span class="argument">--quiet</span><span class="operator">)</span>] <span class="argument">[STRING...]</span>
+<span class="command">string</span> <span class="argument">escape</span> <span class="argument">[</span><span class="operator">(</span><span class="argument">-n</span> <span class="redirect">|</span> <span class="argument">--no-quoted</span><span class="operator">)</span>] <span class="argument">[STRING...]</span>
+<span class="command">string</span> <span class="argument">match</span> <span class="argument">[</span><span class="operator">(</span><span class="argument">-a</span> <span class="redirect">|</span> <span class="argument">--all</span><span class="operator">)</span>] <span class="argument">[</span><span class="operator">(</span><span class="argument">-i</span> <span class="redirect">|</span> <span class="argument">--ignore-case</span><span class="operator">)</span>] <span class="argument">[</span><span class="operator">(</span><span class="argument">-r</span> <span class="redirect">|</span> <span class="argument">--regex</span><span class="operator">)</span>]
+             <span class="argument">[</span><span class="operator">(</span><span class="argument">-n</span> <span class="redirect">|</span> <span class="argument">--index</span><span class="operator">)</span>] <span class="argument">[</span><span class="operator">(</span><span class="argument">-q</span> <span class="redirect">|</span> <span class="argument">--quiet</span><span class="operator">)</span>] <span class="argument">[</span><span class="operator">(</span><span class="argument">-v</span> <span class="redirect">|</span> <span class="argument">--invert</span><span class="operator">)</span>] <span class="argument">PATTERN</span> <span class="argument">[STRING...]</span>
+<span class="command">string</span> <span class="argument">replace</span> <span class="argument">[</span><span class="operator">(</span><span class="argument">-a</span> <span class="redirect">|</span> <span class="argument">--all</span><span class="operator">)</span>] <span class="argument">[</span><span class="operator">(</span><span class="argument">-i</span> <span class="redirect">|</span> <span class="argument">--ignore-case</span><span class="operator">)</span>] <span class="argument">[</span><span class="operator">(</span><span class="argument">-r</span> <span class="redirect">|</span> <span class="argument">--regex</span><span class="operator">)</span>]
+               <span class="argument">[</span><span class="operator">(</span><span class="argument">-q</span> <span class="redirect">|</span> <span class="argument">--quiet</span><span class="operator">)</span>] <span class="argument">PATTERN</span> <span class="argument">REPLACEMENT</span> <span class="argument">[STRING...]</span>
+</pre><h2><a class="anchor" id="string-description"></a>
+Description</h2>
+<p><code>string</code> performs operations on strings.</p>
+<p>STRING arguments are taken from the command line unless standard input is connected to a pipe or a file, in which case they are read from standard input, one STRING per line. It is an error to supply STRING arguments on the command line and on standard input.</p>
+<p>Arguments beginning with <code>-</code> are normally interpreted as switches; <code>--</code> causes the following arguments not to be treated as switches even if they begin with <code>-</code>. Switches and required arguments are recognized only on the command line.</p>
+<p>Most subcommands accept a <code>-q</code> or <code>--quiet</code> switch, which suppresses the usual output but exits with the documented status.</p>
+<p>In addition to the exit codes documented below, all the string subcommands exit with a value of 2 to indicate that an error occurred.</p>
+<p>The following subcommands are available:</p>
+<ul>
+<li><code>length</code> reports the length of each string argument in characters. Exit status: 0 if at least one non-empty STRING was given, or 1 otherwise.</li>
+<li><code>sub</code> prints a substring of each string argument. The start of the substring can be specified with <code>-s</code> or <code>--start</code> followed by a 1-based index value. Positive index values are relative to the start of the string and negative index values are relative to the end of the string. The default start value is 1. The length of the substring can be specified with <code>-l</code> or <code>--length</code>. If the length is not specified, the substring continues to the end of each STRING. Exit status: 0 if at least one substring operation was performed, 1 otherwise.</li>
+<li><code>split</code> splits each STRING on the separator SEP, which can be an empty string. If <code>-m</code> or <code>--max</code> is specified, at most MAX splits are done on each STRING. If <code>-r</code> or <code>--right</code> is given, splitting is performed right-to-left. This is useful in combination with <code>-m</code> or <code>--max</code>. Exit status: 0 if at least one split was performed, or 1 otherwise.</li>
+<li><code>join</code> joins its STRING arguments into a single string separated by SEP, which can be an empty string. Exit status: 0 if at least one join was performed, or 1 otherwise.</li>
+<li><code>trim</code> removes leading and trailing whitespace from each STRING. If <code>-l</code> or <code>--left</code> is given, only leading whitespace is removed. If <code>-r</code> or <code>--right</code> is given, only trailing whitespace is trimmed. The <code>-c</code> or <code>--chars</code> switch causes the characters in CHARS to be removed instead of whitespace. Exit status: 0 if at least one character was trimmed, or 1 otherwise.</li>
+<li><code>escape</code> escapes each STRING such that it can be passed back to <code>eval</code> to produce the original argument again. By default, all special characters are escaped, and quotes are used to simplify the output when possible. If <code>-n</code> or <code>--no-quote</code> is given, the simplifying quoted format is not used. Exit status: 0 if at least one string was escaped, or 1 otherwise.</li>
+<li><code>match</code> tests each STRING against PATTERN and prints matching substrings. Only the first match for each STRING is reported unless <code>-a</code> or <code>--all</code> is given, in which case all matches are reported. Matching can be made case-insensitive with <code>-i</code> or <code>--ignore-case</code>. If <code>-n</code> or <code>--index</code> is given, each match is reported as a 1-based start position and a length. By default, PATTERN is interpreted as a glob pattern matched against each entire STRING argument. If <code>-r</code> or <code>--regex</code> is given, PATTERN is interpreted as a Perl-compatible regular expression. For a regular expression containing capturing groups, multiple items will be reported for each match, one for the entire match and one for each capturing group. If &ndash;invert or -v is used the selected lines will be only those which do not match the given glob pattern or regular expression. Exit status: 0 if at least one match was found, or 1 otherwise.</li>
+<li><code>replace</code> is similar to <code>match</code> but replaces non-overlapping matching substrings with a replacement string and prints the result. By default, PATTERN is treated as a literal substring to be matched. If <code>-r</code> or <code>--regex</code> is given, PATTERN is interpreted as a Perl-compatible regular expression, and REPLACEMENT can contain C-style escape sequences like <code>\t</code> as well as references to capturing groups by number or name as <code>$n</code> or <code>${n}</code>. Exit status: 0 if at least one replacement was performed, or 1 otherwise.</li>
+</ul>
+<h2><a class="anchor" id="string-example"></a>
+Examples</h2>
+ 
+ <pre class="fish cli-dark">
+<span class="prompt">&gt;</span> <span class="command">string</span> <span class="argument">length</span> <span class="string">'hello, world'</span>
+<span class="output">12</span>
+
+<span class="prompt">&gt;</span> <span class="command">set</span> <span class="argument">str</span> <span class="argument">foo</span>
+<span class="prompt">&gt;</span> <span class="command">string</span> <span class="argument">length</span> <span class="argument">-q</span> <span class="variable"><span class="operator">$</span>str</span><span class="redirect">;</span> <span class="command">echo</span> <span class="variable"><span class="operator">$</span>status</span>
+0
+<span class="comment"># Equivalent to test -n $str</span>
+</pre> 
+ <pre class="fish cli-dark">
+<span class="prompt">&gt;</span> <span class="command">string</span> <span class="argument">sub</span> <span class="argument">--length</span> <span class="argument">2</span> <span class="argument">abcde</span>
+<span class="output">ab</span>
+
+<span class="prompt">&gt;</span> <span class="command">string</span> <span class="argument">sub</span> <span class="argument">-s</span> <span class="argument">2</span> <span class="argument">-l</span> <span class="argument">2</span> <span class="argument">abcde</span>
+<span class="output">bc</span>
+
+<span class="prompt">&gt;</span> <span class="command">string</span> <span class="argument">sub</span> <span class="argument">--start=-2</span> <span class="argument">abcde</span>
+<span class="output">de</span>
+</pre> 
+ <pre class="fish cli-dark">
+<span class="prompt">&gt;</span> <span class="command">string</span> <span class="argument">split</span> <span class="argument">.</span> <span class="file">example.com</span>
+<span class="output">example</span>
+<span class="output">com</span>
+
+<span class="prompt">&gt;</span> <span class="command">string</span> <span class="argument">split</span> <span class="argument">-r</span> <span class="argument">-m1</span> <span class="path">/</span> <span class="path">/usr/local/bin/fish</span>
+<span class="output">/usr/local/bin</span>
+<span class="output">fish</span>
+
+<span class="prompt">&gt;</span> <span class="command">string</span> <span class="argument">split</span> '' <span class="argument">abc</span>
+<span class="output">a</span>
+<span class="output">b</span>
+<span class="output">c</span>
+</pre> 
+ <pre class="fish cli-dark">
+<span class="prompt">&gt;</span> <span class="binary">seq</span> <span class="argument">3</span> <span class="redirect">|</span> <span class="command">string</span> <span class="argument">join</span> <span class="argument">...</span>
+<span class="output">1...2...3</span>
+</pre> 
+ <pre class="fish cli-dark">
+<span class="prompt">&gt;</span> <span class="command">string</span> <span class="argument">trim</span> <span class="string">' abc  '</span>
+<span class="output">abc</span>
+
+<span class="prompt">&gt;</span> <span class="command">string</span> <span class="argument">trim</span> <span class="argument">--right</span> <span class="argument">--chars=yz</span> <span class="argument">xyzzy</span> <span class="argument">zany</span>
+<span class="output">x</span>
+<span class="output">zan</span>
+</pre> 
+ <pre class="fish cli-dark">
+<span class="prompt">&gt;</span> <span class="command">echo</span> <span>\</span>x07 <span class="redirect">|</span> <span class="command">string</span> <span class="argument">escape</span>
+<span>\</span>cg
+</pre><h2><a class="anchor" id="string-example-match-glob"></a>
+Match Glob Examples</h2>
+ 
+ <pre class="fish cli-dark">
+<span class="prompt">&gt;</span> <span class="command">string</span> <span class="argument">match</span> <span class="string">'?'</span> <span class="argument">a</span>
+<span class="output">a</span>
+
+<span class="prompt">&gt;</span> <span class="command">string</span> <span class="argument">match</span> <span class="string">'a*b'</span> <span class="argument">axxb</span>
+<span class="output">axxb</span>
+
+<span class="prompt">&gt;</span> <span class="command">string</span> <span class="argument">match</span> <span class="argument">-i</span> <span class="string">'a??B'</span> <span class="argument">Axxb</span>
+<span class="output">Axxb</span>
+
+<span class="prompt">&gt;</span> <span class="command">echo</span> <span class="string">'ok?'</span> <span class="redirect">|</span> <span class="command">string</span> <span class="argument">match</span> <span class="string">'*<span>\</span>?'</span>
+>_ <span class="output">ok?</span>
+
+<span class="prompt">&gt;</span> <span class="command">string</span> <span class="argument">match</span> <span class="argument">-r</span> <span class="argument">-v</span> <span class="string">"c.*[12]"</span> {<span class="argument">cat</span>,dog}<span class="operator">(</span><span class="binary">seq</span> <span class="argument">1</span> <span class="argument">4</span><span class="operator">)</span>
+<span class="output">dog1</span>
+<span class="output">dog2</span>
+<span class="output">cat3</span>
+<span class="output">dog3</span>
+<span class="output">cat4</span>
+<span class="output">dog4</span>
+</pre><h2><a class="anchor" id="string-example-match-regex"></a>
+Match Regex Examples</h2>
+ 
+ <pre class="fish cli-dark">
+<span class="prompt">&gt;</span> <span class="command">string</span> <span class="argument">match</span> <span class="argument">-r</span> <span class="string">'cat|dog|fish'</span> <span class="string">'nice dog'</span>
+<span class="output">dog</span>
+
+<span class="prompt">&gt;</span> <span class="command">string</span> <span class="argument">match</span> <span class="argument">-r</span> <span class="string">'<span class="operator">(</span><span>\</span>d<span>\</span>d?<span class="operator">)</span>:<span class="operator">(</span><span>\</span>d<span>\</span>d<span class="operator">)</span>:<span class="operator">(</span><span>\</span>d<span>\</span>d<span class="operator">)</span>'</span> 2:34:56
+<span class="output">2:34:56</span>
+<span class="output">2</span>
+<span class="output">34</span>
+<span class="output">56</span>
+
+<span class="prompt">&gt;</span> <span class="command">string</span> <span class="argument">match</span> <span class="argument">-r</span> <span class="string">'^<span class="operator">(</span><span>\</span>w{2,4}<span class="operator">)</span><span>\</span>g1$'</span> <span class="argument">papa</span> <span class="argument">mud</span> <span class="argument">murmur</span>
+<span class="output">papa</span>
+<span class="output">pa</span>
+<span class="output">murmur</span>
+<span class="output">mur</span>
+
+<span class="prompt">&gt;</span> <span class="command">string</span> <span class="argument">match</span> <span class="argument">-r</span> <span class="argument">-a</span> <span class="argument">-n</span> <span class="argument">at</span> <span class="argument">ratatat</span>
+<span class="output">2 2</span>
+<span class="output">4 2</span>
+<span class="output">6 2</span>
+
+<span class="prompt">&gt;</span> <span class="command">string</span> <span class="argument">match</span> <span class="argument">-r</span> <span class="argument">-i</span> <span class="string">'0x[0-9a-f]{1,8}'</span> <span class="string">'int magic = 0xBadC0de;'</span>
+<span class="output">0xBadC0de</span>
+</pre><h2><a class="anchor" id="string-example-replace-literal"></a>
+Replace Literal Examples</h2>
+ 
+ <pre class="fish cli-dark">
+<span class="prompt">&gt;</span> <span class="command">string</span> <span class="argument">replace</span> <span class="argument">is</span> <span class="argument">was</span> <span class="string">'blue is my favorite'</span>
+<span class="output">blue was my favorite</span>
+
+<span class="prompt">&gt;</span> <span class="command">string</span> <span class="argument">replace</span> <span class="argument">3rd</span> <span class="argument">last</span> <span class="argument">1st</span> <span class="argument">2nd</span> <span class="argument">3rd</span>
+<span class="output">1st</span>
+<span class="output">2nd</span>
+<span class="output">last</span>
+
+<span class="prompt">&gt;</span> <span class="command">string</span> <span class="argument">replace</span> <span class="argument">-a</span> <span class="string">' '</span> _ <span class="string">'spaces to underscores'</span>
+<span class="output">spaces_to_underscores</span>
+</pre><h2><a class="anchor" id="string-example-replace-Regex"></a>
+Replace Regex Examples</h2>
+ 
+ <pre class="fish cli-dark">
+<span class="prompt">&gt;</span> <span class="command">string</span> <span class="argument">replace</span> <span class="argument">-r</span> <span class="argument">-a</span> <span class="string">'[^<span>\</span>d.]+'</span> <span class="string">' '</span> <span class="string">'0 one two 3.14 four 5x'</span>
+<span class="output">0 3.14 5</span>
+
+<span class="prompt">&gt;</span> <span class="command">string</span> <span class="argument">replace</span> <span class="argument">-r</span> <span class="string">'<span class="operator">(</span><span>\</span>w+<span class="operator">)</span><span>\</span>s+<span class="operator">(</span><span>\</span>w+<span class="operator">)</span>'</span> <span class="string">'$2 $1 $$'</span> <span class="string">'left right'</span>
+<span class="output">right left $</span>
+
+<span class="prompt">&gt;</span> <span class="command">string</span> <span class="argument">replace</span> <span class="argument">-r</span> <span class="string">'<span>\</span>s*newline<span>\</span>s*'</span> <span class="string">'<span>\</span>n'</span> <span class="string">'put a newline here'</span>
+<span class="output">put a</span>
+<span class="output">here</span>
+</pre><p>Back to <a href="index.html#toc-commands">index</a>. </p><hr/>
+ <h1><a class="anchor" id="suspend"></a>
+suspend - suspend the current shell</h1>
+<h2><a class="anchor" id="suspend-synopsis"></a>
+Synopsis</h2>
+ 
+ <pre class="fish synopsis">
+<span class="command">suspend</span> <span class="argument">[</span><span class="argument">--force</span>]
+</pre><h2><a class="anchor" id="suspend-description"></a>
+Description</h2>
+<p><code>suspend</code> suspends execution of the current shell by sending it a SIGTSTP signal, returning to the controlling process. It can be resumed later by sending it a SIGCONT. In order to prevent suspending a shell that doesn't have a controlling process, it will not suspend a the shell if it is a login shell or if <code>$SHLVL</code> is less <code>$suspend_minimum_SHLVL</code>, which defaults to three. This test is skipped if the <code>--force</code> option is given or the shell is not interactive.</p>
 <p>Back to <a href="index.html#toc-commands">index</a>. </p><hr/>
  <h1><a class="anchor" id="switch"></a>
 switch - conditionally execute a block of commands</h1>
@@ -1814,7 +2160,9 @@ Synopsis</h2>
 Description</h2>
 <p>Tests the expression given and sets the exit status to 0 if true, and 1 if false. An expression is made up of one or more operators and their arguments.</p>
 <p>The first form (<code>test</code>) is preferred. For compatibility with other shells, the second form is available: a matching pair of square brackets (<code>[ [EXPRESSION ] ]</code>).</p>
-<p>The following operators are available to examine files and directories:</p>
+<p>This test is mostly POSIX-compatible.</p>
+<h2><a class="anchor" id="test-files"></a>
+Operators for files and directories</h2>
 <ul>
 <li><code>-b FILE</code> returns true if <code>FILE</code> is a block device.</li>
 <li><code>-c FILE</code> returns true if <code>FILE</code> is a character device.</li>
@@ -1834,14 +2182,16 @@ Description</h2>
 <li><code>-w FILE</code> returns true if <code>FILE</code> is marked as writable; note that this does not check if the filesystem is read-only.</li>
 <li><code>-x FILE</code> returns true if <code>FILE</code> is marked as executable.</li>
 </ul>
-<p>The following operators are available to compare and examine text strings:</p>
+<h2><a class="anchor" id="test-strings"></a>
+Operators for text strings</h2>
 <ul>
 <li><code>STRING1 = STRING2</code> returns true if the strings <code>STRING1</code> and <code>STRING2</code> are identical.</li>
 <li><code>STRING1 != STRING2</code> returns true if the strings <code>STRING1</code> and <code>STRING2</code> are not identical.</li>
 <li><code>-n STRING</code> returns true if the length of <code>STRING</code> is non-zero.</li>
 <li><code>-z STRING</code> returns true if the length of <code>STRING</code> is zero.</li>
 </ul>
-<p>The following operators are available to compare and examine numbers:</p>
+<h2><a class="anchor" id="test-numbers"></a>
+Operators to compare and examine numbers</h2>
 <ul>
 <li><code>NUM1 -eq NUM2</code> returns true if <code>NUM1</code> and <code>NUM2</code> are numerically equal.</li>
 <li><code>NUM1 -ne NUM2</code> returns true if <code>NUM1</code> and <code>NUM2</code> are not numerically equal.</li>
@@ -1851,7 +2201,8 @@ Description</h2>
 <li><code>NUM1 -le NUM2</code> returns true if <code>NUM1</code> is less than or equal to <code>NUM2</code>.</li>
 </ul>
 <p>Note that only integers are supported. For more complex mathematical operations, including fractions, the <code>env</code> program may be useful. Consult the documentation for your operating system.</p>
-<p>Expressions can be combined using the following operators:</p>
+<h2><a class="anchor" id="test-combinators"></a>
+Operators to combine expressions</h2>
 <ul>
 <li><code>COND1 -a COND2</code> returns true if both <code>COND1</code> and <code>COND2</code> are true.</li>
 <li><code>COND1 -o COND2</code> returns true if either <code>COND1</code> or <code>COND2</code> are true.</li>
@@ -1886,6 +2237,18 @@ Examples</h2>
 <span class="command">if</span> <span class="command">test</span> <span class="operator"><span>\</span><span class="operator">(</span></span> <span class="argument">-f</span> <span class="path">/foo</span> <span class="argument">-o</span> <span class="argument">-f</span> <span class="path">/bar</span> <span class="operator"><span>\</span><span class="operator">)</span></span> <span class="argument">-a</span> <span class="operator"><span>\</span><span class="operator">(</span></span> <span class="argument">-f</span> <span class="path">/baz</span> <span class="argument">-o</span> <span class="argument">-f</span> <span class="path">/bat</span> <span class="operator"><span>\</span><span class="operator">)</span></span>
     <span class="command">echo</span> <span class="argument">Success.</span>
 <span class="command">end</span><span class="argument">.</span>
+</pre><p>Numerical comparisons will simply fail if one of the operands is not a number:</p>
+ 
+ <pre class="fish">
+<span class="command">if</span> <span class="command">test</span> <span class="argument">42</span> <span class="argument">-eq</span> <span class="string">"The answer to life, the universe and everything"</span>
+    <span class="command">echo</span> <span class="argument">So</span> <span class="argument">long</span> <span class="argument">and</span> <span class="argument">thanks</span> <span class="command">for</span> <span class="argument">all</span> <span class="argument">the</span> <span class="argument">fish</span> <span class="comment">## will not be executed</span>
+<span class="command">end</span>
+</pre><p>A common comparison is with $status:</p>
+ 
+ <pre class="fish">
+<span class="command">if</span> <span class="command">test</span> <span class="variable"><span class="operator">$</span>status</span> <span class="argument">-eq</span> <span class="argument">0</span>
+    <span class="command">echo</span> <span class="string">"Previous command succeeded"</span>
+<span class="command">end</span>
 </pre><h2><a class="anchor" id="test-standards"></a>
 Standards</h2>
 <p><code>test</code> implements a subset of the <a href="http://www.unix.com/man-page/POSIX/1/test/">IEEE Std 1003.1-2008 (POSIX.1) standard</a>. The following exceptions apply:</p>
@@ -1958,9 +2321,9 @@ Description</h2>
 <h2><a class="anchor" id="type-example"></a>
 Example</h2>
  
- <pre class="fish">
-<span class="command">type</span> <span class="argument">fg</span>
-<span class="comment"># Outputs the string 'fg is a shell builtin'.</span>
+ <pre class="fish cli-dark">
+<span class="prompt">&gt;</span> <span class="command">type</span> <span class="argument">fg</span>
+<span class="output">fg is a builtin</span>
 </pre><p>Back to <a href="index.html#toc-commands">index</a>. </p><hr/>
  <h1><a class="anchor" id="ulimit"></a>
 ulimit - set or get resource usage limits</h1>
@@ -2064,13 +2427,13 @@ Synopsis</h2>
 Description</h2>
 <p><code>while</code> repeatedly executes <code>CONDITION</code>, and if the exit status is 0, then executes <code>COMMANDS</code>.</p>
 <p>If the exit status of <code>CONDITION</code> is non-zero on the first iteration, <code>COMMANDS</code> will not be executed at all.</p>
-<p>Use <a href="#begin"><code>begin; ...; end</code></a> for complex conditions; more complex control can be achieved with <code>while true</code> containing a <a href="#break">break</a>.</p>
+<p>You can use <a href="#and"><code>and</code></a> or <a href="#and"><code>or</code></a> for complex conditions. Even more complex control can be achieved with <code>while true</code> containing a <a href="#break">break</a>.</p>
 <h2><a class="anchor" id="while-example"></a>
 Example</h2>
  
  <pre class="fish">
-<span class="command">while</span> <span class="argument">test</span> <span class="argument">-f</span> <span class="file">foo.txt</span><span class="redirect">;</span> <span class="command">echo</span> <span class="argument">file</span> <span class="argument">exists</span><span class="redirect">;</span> <span class="command">sleep</span> <span class="argument">10</span><span class="redirect">;</span> <span class="command">end</span>
-<span class="comment"># outputs 'file exists' at 10 second intervals as long as the file foo.txt exists.</span>
+<span class="command">while</span> <span class="argument">test</span> <span class="argument">-f</span> <span class="file">foo.txt</span><span class="redirect">;</span> <span class="command">or</span> <span class="command">test</span> <span class="argument">-f</span> <span class="file">bar.txt</span> ; <span class="command">echo</span> <span class="argument">file</span> <span class="argument">exists</span><span class="redirect">;</span> <span class="command">sleep</span> <span class="argument">10</span><span class="redirect">;</span> <span class="command">end</span>
+<span class="comment"># outputs 'file exists' at 10 second intervals as long as the file foo.txt or bar.txt exists.</span>
 </pre><p>Back to <a href="index.html#toc-commands">index</a>.</p>
 
 </div>

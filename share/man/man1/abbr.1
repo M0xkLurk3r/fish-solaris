@@ -1,4 +1,4 @@
-.TH "abbr" 1 "Mon Jul 6 2015" "Version 2.2.0" "fish" \" -*- nroff -*-
+.TH "abbr" 1 "Sat May 21 2016" "Version 2.3.0" "fish" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -9,7 +9,7 @@
 .PP
 .nf
 
-\fBabbr\fP -a word='phrase'
+\fBabbr\fP -a word phrase\&.\&.\&.
 \fBabbr\fP -s
 \fBabbr\fP -l
 \fBabbr\fP -e word
@@ -20,7 +20,7 @@
 .PP
 Abbreviations are user-defined character sequences or words that are replaced with longer phrases after they are entered\&. For example, a frequently-run command such as \fCgit checkout\fP can be abbreviated to \fCgco\fP\&. After entering \fCgco\fP and pressing [\fBSpace\fP] or [\fBEnter\fP], the full text \fCgit checkout\fP will appear in the command line\&.
 .PP
-Abbreviations are stored, by default, in a universal variable\&.
+Abbreviations are stored using universal variables\&. You can create abbreviations directly on the command line, and they will be saved automatically\&. Calling \fCabbr -a\fP in config\&.fish will lead to slightly worse startup performance\&.
 .PP
 The following parameters are available:
 .PP
@@ -33,6 +33,8 @@ The following parameters are available:
 .IP "\(bu" 2
 \fC-e WORD\fP or \fC--erase WORD\fP Erase the abbreviation WORD\&.
 .PP
+.PP
+Note: fish version 2\&.1 supported \fC-a WORD=PHRASE\fP\&. This syntax is now deprecated but will still be converted\&.
 .SS "Examples"
 .PP
 .nf

@@ -1,4 +1,4 @@
-.TH "pushd" 1 "Mon Jul 6 2015" "Version 2.2.0" "fish" \" -*- nroff -*-
+.TH "pushd" 1 "Sat May 21 2016" "Version 2.3.0" "fish" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -14,6 +14,14 @@
 .PP
 .SS "Description"
 The \fCpushd\fP function adds \fCDIRECTORY\fP to the top of the directory stack and makes it the current working directory\&. \fC\fCpopd\fP\fP will pop it off and return to the original directory\&.
+.PP
+Without arguments, it exchanges the top two directories in the stack\&.
+.PP
+\fCpushd +NUMBER\fP rotates the stack counter-clockwise i\&.e\&. from bottom to top
+.PP
+\fCpushd -NUMBER\fP rotates clockwise i\&.e\&. top to bottom\&.
+.PP
+See also \fCdirs\fP and \fCdirs -c\fP\&.
 .SS "Example"
 .PP
 .nf
@@ -34,9 +42,25 @@ The \fCpushd\fP function adds \fCDIRECTORY\fP to the top of the directory stack 
 .PP
 .PP
 .nf
-\fBpopd\fP
+\fBpushd\fP /tmp/
+  Working directory is now /tmp
+  Directory stack contains /tmp /usr/src /usr/src/fish-shell
+.fi
+.PP
+.PP
+.PP
+.nf
+\fBpushd\fP +1
   Working directory is now /usr/src
-  Directory stack contains /usr/src
+  Directory stack contains /usr/src /usr/src/fish-shell /tmp
+.fi
+.PP
+.PP
+.PP
+.nf
+\fBpopd\fP
+  Working directory is now /usr/src/fish-shell
+  Directory stack contains /usr/src/fish-shell /tmp
 .fi
 .PP
  

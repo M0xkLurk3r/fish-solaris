@@ -1,4 +1,4 @@
-.TH "alias" 1 "Mon Jul 6 2015" "Version 2.2.0" "fish" \" -*- nroff -*-
+.TH "alias" 1 "Sat May 21 2016" "Version 2.3.0" "fish" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -25,6 +25,8 @@
 .PP
 .PP
 You cannot create an alias to a function with the same name\&.
+.PP
+Note that spaces need to be escaped in the call to alias just like in the commandline \fIeven inside the quotes\fP\&.
 .SS "Example"
 The following code will create \fCrmi\fP, which runs \fCrm\fP with additional arguments on every invocation\&.
 .PP
@@ -46,6 +48,18 @@ The following code will create \fCrmi\fP, which runs \fCrm\fP with additional ar
 \fBfunction\fP rmi
     \fBrm\fP -i $argv
 \fBend\fP
+.fi
+.PP
+.PP
+.PP
+.nf
+  This needs to have the spaces escaped or 'Chrome\&.app\&.\&.\&.' will be seen as an argument to '/Applications/Google':
+.fi
+.PP
+.PP
+.PP
+.nf
+\fBalias\fP chrome='/Applications/Google\\ Chrome\&.app/Contents/MacOS/Google\\ Chrome banana'
 .fi
 .PP
  

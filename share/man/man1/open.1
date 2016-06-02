@@ -1,4 +1,4 @@
-.TH "open" 1 "Mon Jul 6 2015" "Version 2.2.0" "fish" \" -*- nroff -*-
+.TH "open" 1 "Sat May 21 2016" "Version 2.3.0" "fish" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -13,6 +13,6 @@
 .fi
 .PP
 .SS "Description"
-\fCopen\fP opens a file in its default application, using the \fCxdg-open\fP command if it exists, or else the \fCmimedb\fP command\&.
+\fCopen\fP opens a file in its default application, using the appropriate tool for the operating system\&. On GNU/Linux, this requires the common but optional \fCxdg-open\fP utility, from the \fCxdg-utils\fP package\&.
 .SS "Example"
 \fCopen *\&.txt\fP opens all the text files in the current directory using your system's default text editor\&. 

@@ -75,8 +75,8 @@ How do I set my prompt?</h1>
  
  <pre class="fish cli-dark">
 <span class="command">function</span> <span class="argument">fish_prompt</span>
-    <span class="command">set_color</span> <span class="variable"><span class="operator">$</span><span class="variable">fish_color_cwd</span></span>
-    <span class="command">echo</span> <span class="argument">-n</span> <span class="operator">(</span><span class="function">prompt_pwd</span><span class="operator">)</span>
+    <span class="command">set_color</span> <span class="variable"><span class="operator">$</span>fish_color_cwd</span>
+    <span class="command">echo</span> <span class="argument">-n</span> <span class="operator">(</span><span class="command">prompt_pwd</span><span class="operator">)</span>
     <span class="command">set_color</span> <span class="argument">normal</span>
     <span class="command">echo</span> <span class="argument">-n</span> <span class="string">' &gt; '</span>
 <span class="command">end</span>
@@ -120,7 +120,7 @@ How do I update man page completions?</h1>
  <h1><a class="anchor" id="faq-cwd-symlink"></a>
 Why does cd, $PWD and and various fish commands always resolve symlinked directories to their canonical path?</h1>
 <p><em>For example if <code>~/images</code> is a symlink to <code>~/Documents/Images</code>, if I write '<code>cd images</code>', my prompt will say <code>~/Documents/Images</code>, not <code>~/images</code>.</em></p>
-<p>Because it is impossible to consistently keep symlinked directories unresolved. It is indeed possible to do this partially, and many other shells do so. But it was felt there are enough serious corner cases that this is a bad idea. Most such issues have to do with how '..' is handled, and are varitations of the following example:</p>
+<p>Because it is impossible to consistently keep symlinked directories unresolved. It is indeed possible to do this partially, and many other shells do so. But it was felt there are enough serious corner cases that this is a bad idea. Most such issues have to do with how '..' is handled, and are variations of the following example:</p>
 <p>Writing <code>cd images; ls ..</code> given the above directory structure would list the contents of <code>~/Documents</code>, not of <code>~</code>, even though using <code>cd ..</code> changes the current directory to <code>~</code>, and the prompt, the <code>pwd</code> builtin and many other directory information sources suggest that the current directory is <code>~/images</code> and its parent is <code>~</code>. This issue is not possible to fix without either making every single command into a builtin, breaking Unix semantics or implementing kludges in every single command. This issue can also be seen when doing IO redirection.</p>
 <p>Another related issue is that many programs that operate on recursive directory trees, like the find command, silently ignore symlinked directories. For example, <code>find $PWD -name '*.txt'</code> silently fails in shells that don't resolve symlinked paths.</p>
 <hr/>
@@ -134,10 +134,10 @@ The open command doesn't work.</h1>
 <hr/>
  <h1><a class="anchor" id="faq-default"></a>
 How do I make fish my default shell?</h1>
-<p>If you installed fish manually (e.g. by compiling it, not by using a package manager), you first need to add fish to the list of shells by executing the following command (assuming you installed fish in /usr/local) as root:</p>
+<p>If you installed fish manually (e.g. by compiling it, not by using a package manager), you first need to add fish to the list of shells by executing the following command (assuming you installed fish in /usr/local):</p>
  
  <pre class="fish cli-dark">
-<span class="command">echo</span> <span class="path">/usr/local/bin/fish</span> <span class="redirect">&gt;&gt;/etc/shells</span>
+<span class="command">echo</span> <span class="path">/usr/local/bin/fish</span> <span class="redirect">|</span> <span class="binary">sudo</span> <span class="argument">tee</span> <span class="argument">-a</span> <span class="path">/etc/shells</span>
 </pre><p>If you installed a prepackaged version of fish, the package manager should have already done this for you.</p>
 <p>In order to change your default shell, type:</p>
  
@@ -188,10 +188,14 @@ Uninstalling fish</h1>
  
  <pre class="fish cli-dark">
 <span class="binary">rm</span> <span class="argument">-Rf</span> <span class="path">/usr/local/etc/fish</span> <span class="path">/usr/local/share/fish</span> <span class="path">~/.config/fish</span>
-<span class="binary">rm</span> <span class="path">/usr/local/share/man/man1/fish</span><span class="argument">*.1</span>
+<span class="binary">rm</span> <span class="path">/usr/local/share/man/man1/fish*.1</span>
 <span class="command">cd</span> <span class="path">/usr/local/bin</span>
-<span class="binary">rm</span> <span class="argument">-f</span> <span class="argument">fish</span> <span class="argument">mimedb</span> <span class="argument">fishd</span> <span class="argument">fish_indent</span>
-</pre>
+<span class="binary">rm</span> <span class="argument">-f</span> <span class="argument">fish</span> <span class="argument">fish_indent</span>
+</pre><hr/>
+ <h1><a class="anchor" id="faq-reserved-chars"></a>
+Unicode private-use characters reserved by fish</h1>
+<p>Fish reserves the <a href="http://www.unicode.org/faq/private_use.html">Unicode private-use character range</a> from U+F600 thru U+F73F for internal use. Any attempt to feed characters in that range to fish will result in them being replaced by the Unicode "replacement character" U+FFFD. This includes both interactive input as well as any file read by fish (but not programs run by fish).</p>
+
 </div>
  </div></div><!-- contents -->
 </body>

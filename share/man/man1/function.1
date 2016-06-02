@@ -1,4 +1,4 @@
-.TH "function" 1 "Mon Jul 6 2015" "Version 2.2.0" "fish" \" -*- nroff -*-
+.TH "function" 1 "Sat May 21 2016" "Version 2.3.0" "fish" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -9,7 +9,7 @@
 .PP
 .nf
 
-\fBfunction\fP [OPTIONS] NAME; BODY; \fBend\fP
+\fBfunction\fP NAME [OPTIONS]; BODY; \fBend\fP
 .fi
 .PP
 .SS "Description"
@@ -99,7 +99,7 @@ This will run the \fCmkdir\fP command, and if it is successful, change the curre
 
 \fBfunction\fP notify
     \fBset\fP -l job (\fBjobs\fP -l -g)
-    \fBor\fP \fBbegin\fP; \fBecho\fP 'There are no jobs' >&; \fBreturn\fP 1; \fBend\fP
+    \fBor\fP \fBbegin\fP; \fBecho\fP 'There are no jobs' >&2; \fBreturn\fP 1; \fBend\fP
 .fi
 .PP
 .PP

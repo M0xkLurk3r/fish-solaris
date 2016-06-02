@@ -1,0 +1,85 @@
+src/libpcre2_32_la-pcre2_compile.lo: src/pcre2_compile.c src/config.h \
+ src/pcre2_internal.h /usr/include/ctype.h /usr/include/iso/ctype_iso.h \
+ /usr/include/sys/feature_tests.h /usr/include/sys/ccompile.h \
+ /usr/include/sys/isa_defs.h /usr/include/iso/ctype_c99.h \
+ /usr/gcc/4.8/lib/gcc/i386-pc-solaris2.11/4.8.2/include-fixed/limits.h \
+ /usr/gcc/4.8/lib/gcc/i386-pc-solaris2.11/4.8.2/include-fixed/syslimits.h \
+ /usr/include/limits.h /usr/include/iso/limits_iso.h \
+ /usr/include/sys/int_limits.h \
+ /usr/gcc/4.8/lib/gcc/i386-pc-solaris2.11/4.8.2/include/stddef.h \
+ /usr/include/stdio.h /usr/include/iso/stdio_iso.h \
+ /usr/include/sys/va_list.h /usr/include/stdio_tag.h \
+ /usr/include/stdio_impl.h /usr/include/iso/stdio_c99.h \
+ /usr/include/stdlib.h /usr/include/iso/stdlib_iso.h \
+ /usr/include/iso/stdlib_c99.h /usr/include/string.h \
+ /usr/include/iso/string_iso.h src/pcre2.h \
+ /usr/gcc/4.8/lib/gcc/i386-pc-solaris2.11/4.8.2/include/stdint.h \
+ /usr/include/stdint.h /usr/include/sys/stdint.h \
+ /usr/include/sys/int_types.h /usr/include/sys/int_const.h \
+ src/pcre2_ucp.h src/pcre2_intmodedep.h
+
+src/config.h:
+
+src/pcre2_internal.h:
+
+/usr/include/ctype.h:
+
+/usr/include/iso/ctype_iso.h:
+
+/usr/include/sys/feature_tests.h:
+
+/usr/include/sys/ccompile.h:
+
+/usr/include/sys/isa_defs.h:
+
+/usr/include/iso/ctype_c99.h:
+
+/usr/gcc/4.8/lib/gcc/i386-pc-solaris2.11/4.8.2/include-fixed/limits.h:
+
+/usr/gcc/4.8/lib/gcc/i386-pc-solaris2.11/4.8.2/include-fixed/syslimits.h:
+
+/usr/include/limits.h:
+
+/usr/include/iso/limits_iso.h:
+
+/usr/include/sys/int_limits.h:
+
+/usr/gcc/4.8/lib/gcc/i386-pc-solaris2.11/4.8.2/include/stddef.h:
+
+/usr/include/stdio.h:
+
+/usr/include/iso/stdio_iso.h:
+
+/usr/include/sys/va_list.h:
+
+/usr/include/stdio_tag.h:
+
+/usr/include/stdio_impl.h:
+
+/usr/include/iso/stdio_c99.h:
+
+/usr/include/stdlib.h:
+
+/usr/include/iso/stdlib_iso.h:
+
+/usr/include/iso/stdlib_c99.h:
+
+/usr/include/string.h:
+
+/usr/include/iso/string_iso.h:
+
+src/pcre2.h:
+
+/usr/gcc/4.8/lib/gcc/i386-pc-solaris2.11/4.8.2/include/stdint.h:
+
+/usr/include/stdint.h:
+
+/usr/include/sys/stdint.h:
+
+/usr/include/sys/int_types.h:
+
+/usr/include/sys/int_const.h:
+
+src/pcre2_ucp.h:
+
+src/pcre2_intmodedep.h:

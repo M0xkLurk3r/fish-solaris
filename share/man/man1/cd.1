@@ -1,4 +1,4 @@
-.TH "cd" 1 "Mon Jul 6 2015" "Version 2.2.0" "fish" \" -*- nroff -*-
+.TH "cd" 1 "Sat May 21 2016" "Version 2.3.0" "fish" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -20,6 +20,8 @@ If \fCDIRECTORY\fP is supplied, it will become the new directory\&. If no parame
 If \fCDIRECTORY\fP is a relative path, the paths found in the \fCCDPATH\fP environment variable array will be tried as prefixes for the specified path\&.
 .PP
 Note that the shell will attempt to change directory without requiring \fCcd\fP if the name of a directory is provided (starting with \fC\&.\fP, \fC/\fP or \fC~\fP, or ending with \fC/\fP)\&.
+.PP
+Fish also ships a wrapper function around the builtin \fCcd\fP that understands \fCcd -\fP as changing to the previous directory\&. See also \fC\fCprevd\fP\fP\&. This wrapper function maintains a history of the 25 most recently visited directories in the \fC$dirprev\fP and \fC$dirnext\fP global variables\&.
 .SS "Examples"
 .PP
 .nf

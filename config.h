@@ -4,11 +4,14 @@
 /* Define to 1 if you have the `backtrace' function. */
 #define HAVE_BACKTRACE 1
 
-/* Define to 1 if you have the `backtrace_symbols' function. */
-#define HAVE_BACKTRACE_SYMBOLS 1
+/* Define to 1 if you have the `backtrace_symbols_fd' function. */
+#define HAVE_BACKTRACE_SYMBOLS_FD 1
 
 /* Define to 1 one if the implemented fwprintf is broken */
 /* #undef HAVE_BROKEN_FWPRINTF */
+
+/* Define to 1 if you have the `clock_gettime' function. */
+#define HAVE_CLOCK_GETTIME 1
 
 /* Define to 1 if you have the <curses.h> header file. */
 #define HAVE_CURSES_H 1
@@ -28,6 +31,9 @@
 
 /* Define to 1 if you have the `fputwc' function. */
 #define HAVE_FPUTWC 1
+
+/* Define to 1 if you have the `futimens' function. */
+#define HAVE_FUTIMENS 1
 
 /* Define to 1 if you have the `futimes' function. */
 /* #undef HAVE_FUTIMES */
@@ -79,9 +85,6 @@
 
 /* Define to 1 if realpath accepts null for its second argument. */
 #define HAVE_REALPATH_NULL 1
-
-/* Define to 1 if you have the <regex.h> header file. */
-#define HAVE_REGEX_H 1
 
 /* Define to 1 if you have the <siginfo.h> header file. */
 #define HAVE_SIGINFO_H 1
@@ -194,9 +197,6 @@
 /* Define to 1 if the winsize struct and TIOCGWINSZ macro exist */
 #define HAVE_WINSIZE 1
 
-/* Define to 1 if getopt_long exists and works. */
-#define HAVE_WORKING_GETOPT_LONG 1
-
 /* Define to 1 if the _nl_msg_cat_cntr symbol is exported. */
 /* #undef HAVE__NL_MSG_CAT_CNTR */
 
@@ -216,13 +216,13 @@
 #define NOMACROS 1
 
 /* Define to the address where bug reports for this package should be sent. */
-#define PACKAGE_BUGREPORT "fish-users@lists.sf.net"
+#define PACKAGE_BUGREPORT "fish-users@lists.sourceforge.net"
 
 /* Define to the full name of this package. */
 #define PACKAGE_NAME "fish"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "fish 2.2.0"
+#define PACKAGE_STRING "fish 2.3.0"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "fish"
@@ -231,7 +231,10 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "2.2.0"
+#define PACKAGE_VERSION "2.3.0"
+
+/* The size of `wchar_t', as computed by sizeof. */
+#define SIZEOF_WCHAR_T 4
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
@@ -245,8 +248,43 @@
 /* Perform string translations with gettext */
 /* #undef USE_GETTEXT */
 
+/* Enable extensions on AIX 3, Interix.  */
+#ifndef _ALL_SOURCE
+# define _ALL_SOURCE 1
+#endif
+/* Enable GNU extensions on systems that have them.  */
+#ifndef _GNU_SOURCE
+# define _GNU_SOURCE 1
+#endif
+/* Enable threading extensions on Solaris.  */
+#ifndef _POSIX_PTHREAD_SEMANTICS
+# define _POSIX_PTHREAD_SEMANTICS 1
+#endif
+/* Enable extensions on HP NonStop.  */
+#ifndef _TANDEM_SOURCE
+# define _TANDEM_SOURCE 1
+#endif
+/* Enable general extensions on Solaris.  */
+#ifndef __EXTENSIONS__
+# define __EXTENSIONS__ 1
+#endif
+
+
+/* The size of wchar_t in bits. */
+#define WCHAR_T_BITS 32
+
+/* Define to 1 if on MINIX. */
+/* #undef _MINIX */
+
 /* Macro to enable additional prototypes under BSD */
 /* #undef _NETBSD_SOURCE */
+
+/* Define to 2 if the system does not provide POSIX.1 features except with
+   this defined. */
+/* #undef _POSIX_1_SOURCE */
+
+/* Define to 1 if you need to in order for `stat' and other things to work. */
+/* #undef _POSIX_SOURCE */
 
 /* Macro to enable additional prototypes under BSD */
 /* #undef __BSD_VISIBLE */
@@ -255,9 +293,15 @@
 #define __EXTENSIONS__ 1
 
 #if __GNUC__ >= 3
+#ifndef __warn_unused
 #define __warn_unused __attribute__ ((warn_unused_result))
+#endif
+#ifndef __sentinel
 #define __sentinel __attribute__ ((sentinel))
+#endif
+#ifndef __packed
 #define __packed __attribute__ ((packed))
+#endif
 #else
 #define __warn_unused
 #define __sentinel

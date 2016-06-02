@@ -1,4 +1,4 @@
-.TH "commandline" 1 "Mon Jul 6 2015" "Version 2.2.0" "fish" \" -*- nroff -*-
+.TH "commandline" 1 "Sat May 21 2016" "Version 2.3.0" "fish" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -69,4 +69,32 @@ The following options output metadata about the commandline state:
 \fC-P\fP or \fC--paging-mode\fP evaluates to true if the commandline is showing pager contents, such as tab completions
 .PP
 .SS "Example"
-\fCcommandline -j $history[3]\fP replaces the job under the cursor with the third item from the command line history\&. 
+\fCcommandline -j $history[3]\fP replaces the job under the cursor with the third item from the command line history\&.
+.PP
+If the commandline contains 
+.PP
+.nf
+
+> \fBecho\fP $flounder >&2 | \fBless\fP; \fBand\fP \fBecho\fP $catfish
+.fi
+.PP
+.PP
+(with the cursor on the 'o' of 'flounder')
+.PP
+Then the following invocations behave like this: 
+.PP
+.nf
+
+> \fBcommandline\fP -t
+$flounder
+> \fBcommandline\fP -ct
+$fl
+> \fBcommandline\fP -b  # or just commandline
+\fBecho\fP $flounder >&2 | \fBless\fP; \fBand\fP \fBecho\fP $catfish
+> \fBcommandline\fP -p
+\fBecho\fP $flounder >&2
+> \fBcommandline\fP -j
+\fBecho\fP $flounder >&2 | \fBless\fP
+.fi
+.PP
+ 

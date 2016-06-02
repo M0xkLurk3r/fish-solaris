@@ -1,4 +1,4 @@
-.TH "nextd" 1 "Mon Jul 6 2015" "Version 2.2.0" "fish" \" -*- nroff -*-
+.TH "nextd" 1 "Sat May 21 2016" "Version 2.3.0" "fish" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -16,6 +16,8 @@
 \fCnextd\fP moves forwards \fCPOS\fP positions in the history of visited directories; if the end of the history has been hit, a warning is printed\&.
 .PP
 If the \fC-l\fP or \fC--list\fP flag is specified, the current directory history is also displayed\&.
+.PP
+Note that the \fCcd\fP command limits directory history to the 25 most recently visited directories\&. The history is stored in the \fC$dirprev\fP and \fC$dirnext\fP variables which this command manipulates\&.
 .SS "Example"
 .PP
 .nf

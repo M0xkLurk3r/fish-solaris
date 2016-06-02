@@ -1,4 +1,4 @@
-.TH "fish_prompt" 1 "Mon Jul 6 2015" "Version 2.2.0" "fish" \" -*- nroff -*-
+.TH "fish_prompt" 1 "Sat May 21 2016" "Version 2.3.0" "fish" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -27,7 +27,7 @@ A simple prompt:
 .nf
 
 \fBfunction\fP fish_prompt -d 'Write out the prompt'
-    printf 's%ssss> ' (\fBwhoami\fP) (\fBhostname\fP | \fBcut\fP -d \&. -f 1) \\ 
+    \fBprintf\fP '%s@%s%s%s%s> ' (\fBwhoami\fP) (\fBhostname\fP | \fBcut\fP -d \&. -f 1) \\ 
             (\fBset_color\fP $fish_color_cwd) (\fBprompt_pwd\fP) (\fBset_color\fP normal)
 \fBend\fP
 .fi
