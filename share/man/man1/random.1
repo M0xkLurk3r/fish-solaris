@@ -1,0 +1,31 @@
+.TH "random" 1 "Mon Jul 6 2015" "Version 2.2.0" "fish" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+\fBrandom\fP -- generate random number 
+
+.PP
+.SS "Synopsis"
+.PP
+.nf
+
+\fBrandom\fP [SEED]
+.fi
+.PP
+.SS "Description"
+\fCrandom\fP outputs a random number from 0 to 32766, inclusive\&.
+.PP
+If a \fCSEED\fP value is provided, it is used to seed the random number generator, and no output will be produced\&. This can be useful for debugging purposes, where it can be desirable to get the same random number sequence multiple times\&. If the random number generator is called without first seeding it, the current time will be used as the seed\&.
+.SS "Example"
+The following code will count down from a random number to 1:
+.PP
+.PP
+.nf
+
+\fBfor\fP i \fBin\fP (\fBseq\fP (\fBrandom\fP) -1 1)
+    \fBecho\fP $i
+    \fBsleep\fP
+\fBend\fP
+.fi
+.PP
+ 
