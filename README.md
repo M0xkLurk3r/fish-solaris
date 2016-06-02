@@ -5,9 +5,19 @@ fish is a smart and user-friendly command line shell for OS X, Linux, and the re
 
 For more on fish's design philosophy, see the [design document](http://fishshell.com/docs/current/design.html).
 
+# Solaris Version
+
+## What did I modified?
+
+1.	Some of the C++ Standard function which defines in "std" namespace could not be called directly in Solaris, even declaring "*using namespace std*". for example, "wcscasecmp()" could not be allowed, but "std::wcscasecmp()" could be possibly accepted. So I add the "std" namespace declaration before the standard function of whole project.
+
+2.	Solaris' libc seems did not archieve the system call named "flock()", which could take same effects by calling fcntl(). By Linux MAN pages, the flock() wasn't an standard UNIX system call, and it's only available on Linux and BSD-Famliy OS, so I have to copy flock() functions' source code from [GLIBC](https://www.gnu.org/software/libc/) with no way for chooses.
+
+3.	Still have bugs in this version, may causes by unspported system calls, difference terminal between Linux and solaris, and any other I did not discovered yet.
+
 ## Quick Start
 
-fish generally works like other shells, like bash or zsh. A few important differences can be found at <http://fishshell.com/docs/current/tutorial.html> by searching for the magic phrase "unlike other shells".
+fish generally works like other shells, like bash or zsh. A few important differences can be found at <http://fishshell.com/docs/current/tutorial.html> by searching for the magic phrase 'unlike other shells'.
 
 Detailed user documentation is available by running `help` within fish, and also at <http://fishshell.com/docs/current/index.html>
 
@@ -15,11 +25,9 @@ Detailed user documentation is available by running `help` within fish, and also
 
 fish is written in a sane subset of C++98, with a few components from C++TR1. It builds successfully with g++ 4.2 or later, and with clang. It also will build as C++11.
 
-fish can be built using autotools or Xcode. autoconf 2.60 or later is required to build from git versions, but is not required for releases.
+fish can be built using autotools or Xcode. autoconf 2.60 or later is required.
 
 fish depends on a curses implementation, such as ncurses. The headers and libraries are required for building.
-
-fish requires PCRE2 due to the regular expression support contained in the `string` builtin. A copy is included with the source code, and will be used automatically if it does not already exist on your system.
 
 fish requires gettext for translation support.
 
@@ -27,7 +35,7 @@ Building the documentation requires Doxygen 1.8.7 or newer.
 
 ### Autotools Build
 
-    autoconf [if building from Git]
+    autoconf
     ./configure
     make [gmake on BSD]
     sudo make install
@@ -48,7 +56,7 @@ If fish reports that it could not find curses, try installing a curses developme
 
 On Debian or Ubuntu you want:
 
-    sudo apt-get install build-essential ncurses-dev libncurses5-dev gettext autoconf
+    sudo apt-get install build-essential ncurses-dev libncurses5-dev gettext
 
 On RedHat, CentOS, or Amazon EC2:
 
@@ -57,8 +65,6 @@ On RedHat, CentOS, or Amazon EC2:
 ## Runtime Dependencies
 
 fish requires a curses implementation, such as ncurses, to run.
-
-fish requires PCRE2 due to the regular expression support contained in the `string` builtin. A bundled version will be compiled in automatically at build time if required.
 
 fish requires a number of utilities to operate, which should be present on any Unix, GNU/Linux or OS X system. These include (but are not limited to) hostname, grep, awk, sed, which, and getopt. fish also requires the bc program.
 
@@ -78,11 +84,7 @@ If you wish to use fish as your default shell, use the following command:
 
 	chsh -s /usr/local/bin/fish
 
-chsh will prompt you for your password, and change your default shell. Substitute "/usr/local/bin/fish" with whatever path to fish is in your /etc/shells file.
-
-Use the following command if you didn't already add your fish path to /etc/shells.
-
-        echo /usr/local/bin/fish | sudo tee -a /etc/shells
+chsh will prompt you for your password, and change your default shell.
 
 To switch your default shell back, you can run:
 
@@ -90,12 +92,8 @@ To switch your default shell back, you can run:
 
 Substitute /bin/bash with /bin/tcsh or /bin/zsh as appropriate.
 
-## Contributing Changes to the Code
-
-See the [Guide for Developers](CONTRIBUTING.md).
-
 ## Contact Us
 
-Questions, comments, rants and raves can be posted to the official fish mailing list at <https://lists.sourceforge.net/lists/listinfo/fish-users> or join us on our [gitter.im channel](https://gitter.im/fish-shell/fish-shell) or IRC channel [#fish at irc.oftc.net](https://webchat.oftc.net/?channels=fish). Or use the [fish tag on Stackoverflow](https://stackoverflow.com/questions/tagged/fish).
+Questions, comments, rants and raves can be posted to the official fish mailing list at <https://lists.sourceforge.net/lists/listinfo/fish-users> or join us on our IRC channel [#fish at irc.oftc.net](https://webchat.oftc.net/?channels=fish).
 
 Found a bug? Have an awesome idea? Please open an issue on this github page.
